@@ -363,12 +363,7 @@ class GameScene: SKScene {
             let explosion = Explosion.init(withNode: explosionNode)
             explosions.append(explosion)
             
-            let explosionFrame = SKShapeNode.init(rectOf: CGSize.init(width: explosionNode.frame.width, height: explosionNode.frame.height))
-            explosionFrame.strokeColor = SKColor.blue
-            explosionFrame.position = CGPoint(x: 0, y: 0)
-            
             addChild(explosionNode)
-            explosionNode.addChild(explosionFrame)
             
             explosionNode.run(SKAction.sequence([
                 SKAction.group([
