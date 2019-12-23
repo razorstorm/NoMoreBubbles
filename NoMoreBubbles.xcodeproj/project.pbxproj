@@ -17,6 +17,11 @@
 		967387B422DFC096001940D2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 967387B222DFC096001940D2 /* LaunchScreen.storyboard */; };
 		967387BF22DFC096001940D2 /* NoMoreBubblesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967387BE22DFC096001940D2 /* NoMoreBubblesTests.swift */; };
 		96798ED023A72F0E00380474 /* TrailParticle.sks in Resources */ = {isa = PBXBuildFile; fileRef = 96798ECF23A72F0E00380474 /* TrailParticle.sks */; };
+		96E2A0A223B06098004EC14A /* Circle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2A0A123B06098004EC14A /* Circle.swift */; };
+		96E2A0A523B06266004EC14A /* Ball.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2A0A423B06266004EC14A /* Ball.swift */; };
+		96E2A0A723B062EC004EC14A /* ScoreBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2A0A623B062EC004EC14A /* ScoreBoard.swift */; };
+		96E2A0A923B06330004EC14A /* Explosion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2A0A823B06330004EC14A /* Explosion.swift */; };
+		96E2A0AB23B063AC004EC14A /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2A0AA23B063AC004EC14A /* Utils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +49,11 @@
 		967387BE22DFC096001940D2 /* NoMoreBubblesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoMoreBubblesTests.swift; sourceTree = "<group>"; };
 		967387C022DFC096001940D2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		96798ECF23A72F0E00380474 /* TrailParticle.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = TrailParticle.sks; sourceTree = "<group>"; };
+		96E2A0A123B06098004EC14A /* Circle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Circle.swift; sourceTree = "<group>"; };
+		96E2A0A423B06266004EC14A /* Ball.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ball.swift; sourceTree = "<group>"; };
+		96E2A0A623B062EC004EC14A /* ScoreBoard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScoreBoard.swift; sourceTree = "<group>"; };
+		96E2A0A823B06330004EC14A /* Explosion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosion.swift; sourceTree = "<group>"; };
+		96E2A0AA23B063AC004EC14A /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,16 +95,21 @@
 		967387A222DFC094001940D2 /* NoMoreBubbles */ = {
 			isa = PBXGroup;
 			children = (
-				967387A322DFC094001940D2 /* AppDelegate.swift */,
-				967387A522DFC094001940D2 /* GameScene.sks */,
+				967387B522DFC096001940D2 /* Info.plist */,
 				967387A722DFC094001940D2 /* Actions.sks */,
+				967387A522DFC094001940D2 /* GameScene.sks */,
+				96798ECF23A72F0E00380474 /* TrailParticle.sks */,
+				967387A322DFC094001940D2 /* AppDelegate.swift */,
+				96E2A0A423B06266004EC14A /* Ball.swift */,
+				96E2A0A123B06098004EC14A /* Circle.swift */,
+				96E2A0A823B06330004EC14A /* Explosion.swift */,
 				967387A922DFC094001940D2 /* GameScene.swift */,
 				967387AB22DFC094001940D2 /* GameViewController.swift */,
-				967387AD22DFC094001940D2 /* Main.storyboard */,
+				96E2A0A623B062EC004EC14A /* ScoreBoard.swift */,
+				96E2A0AA23B063AC004EC14A /* Utils.swift */,
 				967387B022DFC096001940D2 /* Assets.xcassets */,
 				967387B222DFC096001940D2 /* LaunchScreen.storyboard */,
-				967387B522DFC096001940D2 /* Info.plist */,
-				96798ECF23A72F0E00380474 /* TrailParticle.sks */,
+				967387AD22DFC094001940D2 /* Main.storyboard */,
 			);
 			path = NoMoreBubbles;
 			sourceTree = "<group>";
@@ -213,8 +228,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				967387AA22DFC094001940D2 /* GameScene.swift in Sources */,
+				96E2A0A923B06330004EC14A /* Explosion.swift in Sources */,
+				96E2A0A223B06098004EC14A /* Circle.swift in Sources */,
+				96E2A0A523B06266004EC14A /* Ball.swift in Sources */,
+				96E2A0A723B062EC004EC14A /* ScoreBoard.swift in Sources */,
 				967387AC22DFC094001940D2 /* GameViewController.swift in Sources */,
 				967387A422DFC094001940D2 /* AppDelegate.swift in Sources */,
+				96E2A0AB23B063AC004EC14A /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
