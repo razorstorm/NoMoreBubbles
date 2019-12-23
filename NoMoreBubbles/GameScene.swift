@@ -9,6 +9,44 @@
 import SpriteKit
 import GameplayKit
 
+func lerp(a : CGFloat, b : CGFloat, fraction : CGFloat) -> CGFloat
+{
+    return (b-a) * fraction + a
+}
+
+struct ColorComponents {
+    var red = CGFloat(0)
+    var green = CGFloat(0)
+    var blue = CGFloat(0)
+    var alpha = CGFloat(0)
+}
+
+extension UIColor {
+    func toComponents() -> ColorComponents {
+        var components = ColorComponents()
+        getRed(&components.red, green: &components.green, blue: &components.blue, alpha: &components.alpha)
+        return components
+    }
+}
+
+extension SKAction {
+    static func colorTransitionAction(fromColor : UIColor, toColor : UIColor, duration : Double = 0.4) -> SKAction
+    {
+        return SKAction.customAction(withDuration: duration, actionBlock: { (node : SKNode!, elapsedTime : CGFloat) -> Void in
+            let fraction = CGFloat(elapsedTime / CGFloat(duration))
+            let startColorComponents = fromColor.toComponents()
+            let endColorComponents = toColor.toComponents()
+            let transColor = UIColor(red: lerp(a: startColorComponents.red, b: endColorComponents.red, fraction: fraction),
+                                     green: lerp(a: startColorComponents.green, b: endColorComponents.green, fraction: fraction),
+                                     blue: lerp(a: startColorComponents.blue, b: endColorComponents.blue, fraction: fraction),
+                                     alpha: lerp(a: startColorComponents.alpha, b: endColorComponents.alpha, fraction: fraction))
+//            (node as? SKSpriteNode)?.color = transColor
+            (node as? SKShapeNode)?.fillColor = transColor
+        }
+        )
+    }
+}
+
 class Explosion: Equatable {
     let node: SKShapeNode
     var circlesHit: Set<Circle> = []
@@ -77,16 +115,17 @@ class Ball {
     var velocity: CGVector
     var node: SKShapeNode
     var speed: CGFloat
+    var trailNodes: [CGPoint]
     
     public init(fromNode: SKShapeNode, withVelocity: CGVector, withSpeed: CGFloat) {
         node = fromNode
         velocity = withVelocity
         speed = withSpeed
+        trailNodes = [CGPoint]()
     }
 }
 
 class GameScene: SKScene {
-    
     private var circles: [Circle] = []
     private var explosions: [Explosion] = []
     private let lineScalingFactor: CGFloat = 0.085
@@ -116,10 +155,13 @@ class GameScene: SKScene {
     
     private var goal: SKShapeNode?
     
-    private let trailInterval: CGFloat = 5
+    private let trailInterval: CGFloat = 2
+    private let trailLength: Int = 10
     private var previousTime: TimeInterval = TimeInterval.init()
     
     private let physicsFrameRate: CGFloat = 1/60.0
+    
+    private let bgColor: SKColor = SKColor.init(red: 0.15, green: 0.15, blue: 0.15, alpha: 1.0)
     
     override func didMove(to view: SKView) {
         lineOrigin = CGPoint(x: 0 , y: -size.height/2 + ballRadius)
@@ -140,7 +182,7 @@ class GameScene: SKScene {
         let scoreBoardNode = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth + 2, height: screenTop - gameTop + 1))
         scoreBoardNode.position = CGPoint(x: 0, y: screenTop - scoreBoardHeight / 2.0 + 1)
         scoreBoardNode.zPosition = 1
-        scoreBoardNode.fillColor = SKColor.init(red: 0.15, green: 0.15, blue: 0.15, alpha: 1.0)
+        scoreBoardNode.fillColor = bgColor
         
         let label = SKLabelNode.init(text: String(0))
         label.fontSize = scoreFontSize
@@ -159,7 +201,7 @@ class GameScene: SKScene {
         goal!.isAntialiased = true
         addChild(goal!)
         
-//        Timer.scheduledTimer(timeInterval: 1/480.0, target: self, selector: #selector(self.runPhysicsFrame), userInfo: nil, repeats: true)
+//        let timer = Timer.scheduledTimer(timeInterval: 1/60.0, target: self, selector: #selector(self.runPhysicsFrame), userInfo: nil, repeats: true)
     }
     
     func CGDistance(from: CGPoint, to: CGPoint) -> CGFloat {
@@ -242,12 +284,12 @@ class GameScene: SKScene {
         let label = SKLabelNode.init(text: String(health))
         label.fontSize = size * fontScalingFactor
         label.fontColor = color
-//        label.fontName = "HelveticaNeue-UltraLight"
+        label.fontName = "HelveticaNeue-Light"
 //        label.fontName = "Noteworthy-Bold"
 //        label.fontName = "Zapfino"
-        label.fontName = "ChalkboardSE-Bold"
+//        label.fontName = "ChalkboardSE-Bold"
         label.position = CGPoint(x: 0, y: -label.frame.height/2)
-        
+
         addChild(node)
         node.addChild(label)
         
@@ -344,8 +386,8 @@ class GameScene: SKScene {
             self.circles.remove(at: i)
             
             let actions = SKAction.group([
-                SKAction.scale(by: 0, duration: 0.3),
-                SKAction.fadeOut(withDuration: 0.3)
+                SKAction.scale(by: 0, duration: 0.5),
+                SKAction.fadeOut(withDuration: 0.5)
             ])
 
             circle.node.run(actions, completion: {
@@ -423,115 +465,110 @@ class GameScene: SKScene {
     }
     
     @objc func runPhysicsFrame() {
-        
     }
-    
+
     override func update(_ currentTime: TimeInterval) {
+//        let start = DispatchTime.now() // <<<<<<<<<< Start time
+        
         let frameInterval: CGFloat = CGFloat(currentTime - previousTime)
         let frameScalingFactor: CGFloat = frameInterval / physicsFrameRate
-        
+
         previousTime = currentTime
+//        printTime(startTime: start , message: "frame adjustments")
+        
         if (ball != nil) {
             if (ball!.speed <= 0) {
                 onBallStop()
             }
             else {
+//                let speedStart = DispatchTime.now()
+//                ball!.trailNodes.append(ball!.node.position)
+//                if (ball!.trailNodes.count > trailLength) {
+//                    ball!.trailNodes.removeFirst(ball!.trailNodes.count - trailLength)
+//                }
                 var ballPosition = CGPoint(x: ball!.node.position.x + ball!.velocity.dx * frameScalingFactor, y: ball!.node.position.y + ball!.velocity.dy * frameScalingFactor)
                 ball!.speed += scaledAcceleration(speed: ball!.speed) // ballAcceleration
 
                 ball!.velocity = ball!.speed * normalizeVector(vector: ball!.velocity)
-                //getVelocity(withDeltas: CGPoint(x: ball!.velocity.dx, y: ball!.velocity.dy), withSpeed: ball!.speed)
+//                getVelocity(withDeltas: CGPoint(x: ball!.velocity.dx, y: ball!.velocity.dy), withSpeed: ball!.speed)
                 
-                // collision with walls
+//                printTime(startTime: start, message: "speedStart")
+
+                
+//                let collisonsStart = DispatchTime.now()
+//                 collision with walls
                 let ballCenter = ballPosition
-                let sideWalls = [
-                    CGPoint(x: screenLeft, y: ballCenter.y), CGPoint(x: screenRight, y: ballCenter.y)
-                ]
-                let topAndBottomWalls = [
-                    CGPoint(x: ballCenter.x, y: screenBottom), CGPoint(x: ballCenter.x, y: gameTop)
-                ]
-                
-                let offset = ballRadius + 2
-                for wall in sideWalls {
-                    if CGDistance(from: wall, to: ballCenter) <= ballRadius {
-                        if wall.x > 0 {
-                            ball!.velocity.dx = -abs(ball!.velocity.dx)
-                        } else {
-                            ball!.velocity.dx = abs(ball!.velocity.dx)
-                        }
-                        ballPosition.x = wall.x > 0 ? wall.x - offset : wall.x + offset
-                    }
+
+                if ballCenter.x - ballRadius < screenLeft && ball!.velocity.dx < 0 {
+                    ball!.velocity.dx = abs(ball!.velocity.dx)
                 }
-                
-                for wall in topAndBottomWalls {
-                    if CGDistance(from: wall, to: ballCenter) <= ballRadius {
-                        if wall.y > 0 {
-                            ball!.velocity.dy = -abs(ball!.velocity.dy)
-                        } else {
-                            ball!.velocity.dy = abs(ball!.velocity.dy)
-                        }
-                        ballPosition.y = wall.y > 0 ? wall.y - offset : wall.y + offset
-                    }
+                else if ballCenter.x + ballRadius > screenRight && ball!.velocity.dx > 0 {
+                    ball!.velocity.dx = -abs(ball!.velocity.dx)
                 }
-                
-                if ballPosition.x - ballRadius < screenLeft {
-                    ballPosition.x = screenLeft + ballRadius + offset
+                else if ballCenter.y - ballRadius < screenBottom && ball!.velocity.dy < 0 {
+                    ball!.velocity.dy = abs(ball!.velocity.dy)
                 }
-                if ballPosition.x + ballRadius > screenRight {
-                    ballPosition.x = screenRight - ballRadius - offset
+                else if ballCenter.y + ballRadius > gameTop && ball!.velocity.dy > 0 {
+                    ball!.velocity.dy = -abs(ball!.velocity.dy)
                 }
-                if ballPosition.y - ballRadius < screenBottom {
-                    ballPosition.y = screenBottom + ballRadius + offset
-                }
-                if ballPosition.y + ballRadius > gameTop {
-                    ballPosition.y = gameTop - ballRadius - offset
-                }
-                
+
                 // collision with other circles
                 for (i,circle) in circles.enumerated() {
                     if CGDistance(from: ballCenter, to: circle.node.position) <= circle.radius + ballRadius {
                         ballPosition = onCollideWithCircle(ballCenter: ballCenter, circle: circle, withIndex: i)
                     }
                 }
-                
-                // Make trails
+
+//                printTime(startTime: start, message: "collisionsAll")
+//                 Make trails
+//                let trailsStart = DispatchTime.now()
                 let travelVector = normalizeVector(vector: CGVector(dx: ballPosition.x - ball!.node.position.x, dy: ballPosition.y - ball!.node.position.y))
                 var trailPosition = ball!.node.position
                 let scaledTravelVector = CGVector(dx: trailInterval * travelVector.dx, dy: trailInterval * travelVector.dy)
-                
+
                 let distance = CGDistance(from: ball!.node.position, to: ballPosition)
                 let distanceIntervals = Int(distance/trailInterval)
                 for _ in 0...distanceIntervals {
                     let trailNode = SKShapeNode.init(circleOfRadius: ballRadius * 0.8)
-                    trailNode.fillColor = SKColor.white
+                    trailNode.fillColor = SKColor.lightGray
                     trailNode.lineWidth = 0
-                    trailNode.strokeColor = SKColor.white
+                    trailNode.strokeColor = SKColor.lightGray
                     trailNode.alpha = 0.5
                     trailNode.isAntialiased = true
                     trailNode.position = trailPosition
                     trailNode.glowWidth = 2
                     trailNode.zPosition = -1
-                    
+
                     trailPosition.x += scaledTravelVector.dx
                     trailPosition.y += scaledTravelVector.dy
-                    
+
                     addChild(trailNode)
-                    
+
                     let duration = 0.3
-                    
+
                     trailNode.run(SKAction.sequence([
                         SKAction.wait(forDuration: 0.0),
                         SKAction.group([
-                            SKAction.fadeOut(withDuration: 0.3),
-                            SKAction.scale(by: 0, duration: duration),
+                            SKAction.colorTransitionAction(fromColor: trailNode.fillColor, toColor: bgColor, duration: 0.3),
+                            SKAction.scale(by: 0, duration: duration)
                         ]),
                         SKAction.removeFromParent()
                     ]))
                 }
-                
+
                 ball!.node.position = ballPosition
             }
         }
+
         updateExplosions()
+    }
+    
+    func printTime(startTime: DispatchTime, message: String) {
+        let end = DispatchTime.now()   // <<<<<<<<<<   end time
+        
+        let nanoTime = end.uptimeNanoseconds - startTime.uptimeNanoseconds // <<<<< Difference in nano seconds (UInt64)
+        let timeInterval = Double(nanoTime) / 1_000_000 // Technically could o
+        let asFrames = timeInterval / (1/60.0)
+        print("\(message): \(asFrames)")
     }
 }
