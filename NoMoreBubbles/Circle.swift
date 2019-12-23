@@ -16,10 +16,11 @@ class Circle: Hashable  {
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(radius)
-        hasher.combine(node)
-        hasher.combine(health)
-        hasher.combine(labelNode)
+        hasher.combine(ObjectIdentifier(self).hashValue)
+//        hasher.combine(radius)
+//        hasher.combine(node)
+//        hasher.combine(health)
+//        hasher.combine(labelNode)
     }
     
     var radius: CGFloat
