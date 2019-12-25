@@ -478,7 +478,7 @@ class GameScene: SKScene {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
         
-        generateParticles(position: ball!.node.position)
+        generateParticles(position: ball!.node.position, color: circle.node.fillColor.withAlphaComponent(1.0))
         
         return ballPosition
     }
@@ -502,22 +502,19 @@ class GameScene: SKScene {
         }
     }
     
-    func generateParticles(position: CGPoint) {
+    func generateParticles(position: CGPoint, color: UIColor = UIColor.white) {
         if let emitter = SKEmitterNode(fileNamed: "TrailParticle.sks") {
             emitter.position = ball!.node.position // center of screen
             emitter.name = "boom"
             emitter.targetNode = self
             emitter.zPosition = 10
             emitter.particleZPosition = 10
-            emitter.emissionAngleRange = 2 * CGFloat.pi
-            emitter.particleSpeedRange = 100
-            emitter.particleScaleRange = 0.3
-            emitter.particleScaleSpeed = -0.2
-            emitter.numParticlesToEmit = Int.random(in: 10...20)
-            emitter.particleColor = UIColor.white
+            emitter.numParticlesToEmit = Int.random(in: 5...10)
+            emitter.particleColorSequence = nil
+            emitter.particleColor = color
             addChild(emitter)
             
-            let duration = 1.5
+            let duration = 0.5
             emitter.run(SKAction.sequence([
                 SKAction.wait(forDuration: 0.0),
                 SKAction.group([
