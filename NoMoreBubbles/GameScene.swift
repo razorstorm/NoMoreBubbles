@@ -32,8 +32,6 @@ class GameScene: SKScene {
     private var screenBottom: CGFloat = 0
     private var gameTop: CGFloat = 0
     
-//    private let restartButton = SKSpriteNode(imageNamed: "image-button")
-    
     private var scoreBoard: ScoreBoard?
     private let scoreBoardHeight: CGFloat = 130
     
@@ -58,7 +56,7 @@ class GameScene: SKScene {
         screenLeft = -screenWidth/2
         screenRight = screenWidth/2
         screenTop = screenHeight/2
-        gameTop = screenTop - scoreBoardHeight - 2 - 5
+        gameTop = screenTop - scoreBoardHeight - 1
         screenBottom = -screenHeight/2
         
         let scoreBoardNode = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth + 2, height: scoreBoardHeight + 1))
@@ -81,6 +79,7 @@ class GameScene: SKScene {
         goal = SKShapeNode(circleOfRadius: goalRadius)
         goal!.position = origin!
         goal!.strokeColor = SKColor.green
+        goal!.fillColor = UIColor.green.withAlphaComponent(0.1)
         goal!.isAntialiased = true
         goal!.lineWidth = 2
         addChild(goal!)
@@ -89,15 +88,23 @@ class GameScene: SKScene {
     }
     
     func startGame() {
-        let bottomMargin = CGFloat(250)
+        let bottomMargin = CGFloat(50)
         let circleMinSize = CGFloat(15)
-        let circleMaxSize = CGFloat(50)
-        let margin = CGFloat(70)
+        let circleMaxSize = CGFloat(70)
         let maxRounds = 10000
 
-        ballLoop: for _ in 4...6 {
-            var xPosition: CGFloat
-            var yPosition: CGFloat
+        scoreBoard?.score = 0
+        for circle in circles {
+            circle.node.removeAllChildren()
+            circle.node.removeFromParent()
+        }
+        circles = []
+        ball?.node.removeFromParent()
+        ball = nil
+        
+        let gameBottom = screenBottom + bottomMargin
+        
+        ballLoop: for i in 1...Int.random(in: 3...6) {
             var position: CGPoint
             var invalidPosition: Bool = false
             var rounds: Int = 0
@@ -106,25 +113,73 @@ class GameScene: SKScene {
                 if (rounds > maxRounds) {
                     continue ballLoop
                 }
-                if circles.count == 0 {
-                    xPosition = [CGFloat.random(in: screenLeft+circleMinSize...screenLeft+circleMaxSize), CGFloat.random(in: screenRight-circleMaxSize...screenRight-circleMinSize)].randomElement()!
-                    yPosition = [CGFloat.random(in: screenBottom+circleMinSize+bottomMargin...screenBottom+bottomMargin+circleMaxSize), CGFloat.random(in: gameTop-circleMaxSize...gameTop-circleMinSize)].randomElement()!
-                } else {
-                    xPosition = [CGFloat.random(in: screenLeft+circleMinSize...screenLeft+margin), CGFloat.random(in: screenRight-margin...screenRight-circleMinSize)].randomElement()!
-                    yPosition = [CGFloat.random(in: screenBottom+circleMinSize+bottomMargin...screenBottom+bottomMargin+margin), CGFloat.random(in: gameTop-margin...gameTop-circleMinSize)].randomElement()!
+                
+                position = generateRandomSeedCircleLocation(
+                    circleMinSize: circleMinSize,
+                    circleMaxSize: circleMaxSize,
+                    gameBottom: gameBottom
+                )
+
+                // See if it is too far from the walls
+                let tooFarFromWalls = (position.x - screenLeft > circleMaxSize && screenRight - position.x > circleMaxSize) &&
+                    (position.y - gameBottom > circleMaxSize && gameTop - position.y > circleMaxSize)
+                
+                // If the position is too close to the goal post we can't spawn circle there
+                if CGDistance(from: origin!, to: position) < goalRadius + circleMinSize {
+                    invalidPosition = true
                 }
-                position = CGPoint(x: xPosition, y: yPosition)
+                
                 for circle in circles {
                     // If this is inside any of the other circles, then we haven't found a valid position yet. Keep looking
                     if CGDistance(from: position, to: circle.node.position) <= circle.radius + circleMinSize {
+                        invalidPosition = true
+                    }
+                    let tooFarFromCircle = CGDistance(from: position, to: circle.node.position) > circle.radius + circleMaxSize
+                    // If the circle is too far from other circles and is also too far from the wall, it's going to be too big
+                    if tooFarFromCircle && tooFarFromWalls {
                         invalidPosition = true
                     }
                 }
                 rounds+=1
             } while (invalidPosition)
 
-            createCircle(atPoint: position)
+            createCircle(atPoint: position, withHealth: i)
         }
+    }
+    
+    func generateRandomSeedCircleLocation(circleMinSize: CGFloat, circleMaxSize: CGFloat, gameBottom: CGFloat) -> CGPoint {
+        let gracefulMargin = CGFloat(300)
+        var xPosition: CGFloat
+        var yPosition: CGFloat
+        var xClampedPosition: CGFloat
+        var yClampedPosition: CGFloat
+        var xUnclampedPosition: CGFloat
+        var yUnclampedPosition: CGFloat
+        var margin: CGFloat
+        
+        if circles.count == 0 {
+            margin = circleMaxSize
+        } else {
+            // We allow the new circle to be a bit further away from the wall the second time around,
+            // because it can cluster with another circle
+            margin = gracefulMargin
+        }
+        
+        xClampedPosition = [CGFloat.random(in: screenLeft+circleMinSize...screenLeft+margin), CGFloat.random(in: screenRight-margin...screenRight-circleMinSize)].randomElement()!
+        yClampedPosition = [CGFloat.random(in: gameBottom+circleMinSize...gameBottom+margin), CGFloat.random(in: gameTop-margin...gameTop-circleMinSize)].randomElement()!
+
+        xUnclampedPosition = CGFloat.random(in: screenLeft+circleMinSize...screenRight-circleMinSize)
+        yUnclampedPosition = CGFloat.random(in: gameBottom+circleMinSize...gameTop-circleMinSize)
+
+        if (Bool.random()) {
+            xPosition = xClampedPosition
+            yPosition = yUnclampedPosition
+        } else {
+            xPosition = xUnclampedPosition
+            yPosition = yClampedPosition
+        }
+        
+        return CGPoint(x: xPosition, y: yPosition)
     }
     
     func CGDistance(from: CGPoint, to: CGPoint) -> CGFloat {
@@ -207,9 +262,10 @@ class GameScene: SKScene {
         let label = SKLabelNode.init(text: String(health))
         label.fontSize = size * fontScalingFactor
         label.fontColor = color
-        label.fontName = "HelveticaNeue-Light"
-//        label.fontName = "Noteworthy-Bold"
-//        label.fontName = "Zapfino"
+        label.fontName = "MarkerFelt-Wide"
+//        label.fontName = "HelveticaNeue-Bold"
+//        label.fontName = "AppleSDGothicNeo-Bold"
+//        label.fontName = "Chalkduster"
 //        label.fontName = "ChalkboardSE-Bold"
         label.position = CGPoint(x: 0, y: -label.frame.height/2)
 
@@ -251,21 +307,25 @@ class GameScene: SKScene {
     }
     
     func touchUp(atPoint pos : CGPoint) {
-        if ball == nil {
-            line?.removeFromParent()
-            line = nil
-            let deltas = CGPoint(x: pos.x - lineOrigin!.x, y: pos.y - lineOrigin!.y)
-            
-            let velocity = getVelocity(withDeltas: deltas, withSpeed: ballInitialSpeed)
-            let node = SKShapeNode.init(circleOfRadius: ballRadius)
-            
-            node.fillColor = SKColor.white
-            node.isAntialiased = true
-            node.position = CGPoint(x: lineOrigin!.x, y: lineOrigin!.y)
-            
-            ball = Ball(fromNode: node, withVelocity: velocity, withSpeed: ballInitialSpeed)
-            
-            addChild(node)
+        if pos.y <= gameTop {
+            if ball == nil {
+                line?.removeFromParent()
+                line = nil
+                let deltas = CGPoint(x: pos.x - lineOrigin!.x, y: pos.y - lineOrigin!.y)
+                
+                let velocity = getVelocity(withDeltas: deltas, withSpeed: ballInitialSpeed)
+                let node = SKShapeNode.init(circleOfRadius: ballRadius)
+                
+                node.fillColor = SKColor.white
+                node.isAntialiased = true
+                node.position = CGPoint(x: lineOrigin!.x, y: lineOrigin!.y)
+                
+                ball = Ball(fromNode: node, withVelocity: velocity, withSpeed: ballInitialSpeed)
+                
+                addChild(node)
+            }
+        } else {
+            startGame()
         }
     }
     
@@ -460,7 +520,7 @@ class GameScene: SKScene {
                         SKAction.wait(forDuration: 0.0),
                         SKAction.group([
                             SKAction.colorTransitionAction(fromColor: trailNode.fillColor, toColor: bgColor, duration: duration),
-                            SKAction.fadeOut(withDuration: duration),
+//                            SKAction.fadeOut(withDuration: duration),
                             SKAction.scale(by: 0, duration: duration)
                         ]),
                         SKAction.removeFromParent()
