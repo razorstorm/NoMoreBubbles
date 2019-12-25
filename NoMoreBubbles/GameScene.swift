@@ -6,7 +6,7 @@
 //  Copyright © 2019 Jason Jiang. All rights reserved.
 //
 
-// TODO: refresh scoreboard, add particles, dont spawn circles too close to goal, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
+// TODO: powerups, add particles, dont spawn circles too close to goal, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
 
 import SpriteKit
 import GameplayKit
@@ -17,7 +17,7 @@ class GameScene: SKScene {
     private let lineScalingFactor: CGFloat = 0.085
     private let fontScalingFactor: CGFloat = 1.3
     private let scoreFontSize: CGFloat = 80
-    private let colors: [SKColor] = [SKColor.red, SKColor.cyan, SKColor(red: 0.15, green: 1.0, blue: 0.15, alpha: 1.0), SKColor.yellow, SKColor(red: 0.35, green: 0.35, blue: 1.0, alpha: 1.0), SKColor.lightGray, SKColor.orange]
+    private let colors: [SKColor] = [SKColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0), SKColor.cyan, SKColor(red: 0.2, green: 0.9, blue: 0.2, alpha: 1.0), SKColor.yellow, SKColor(red: 0.45, green: 0.45, blue: 1.0, alpha: 1.0), SKColor.lightGray, SKColor.orange]
     private let maxCircleSize: CGFloat = 170.0
     private var ball: Ball?
     private var origin: CGPoint?
@@ -33,6 +33,7 @@ class GameScene: SKScene {
     private var screenTop: CGFloat = 0
     private var screenBottom: CGFloat = 0
     private var gameTop: CGFloat = 0
+    private var gameBottom: CGFloat = 0
     private let circleMinSize: CGFloat = 15
     private let circleMaxSize: CGFloat = 70
     
@@ -52,8 +53,6 @@ class GameScene: SKScene {
     private let scoreColor: SKColor = SKColor.init(red: 0.20, green: 0.15, blue: 0.20, alpha: 1.0)
     
     override func didMove(to view: SKView) {
-        lineOrigin = CGPoint(x: 0 , y: -size.height/2 + ballRadius)
-        origin = CGPoint(x: 0 , y: -size.height/2)
         screenWidth = size.width
         screenHeight = size.height
         
@@ -62,6 +61,10 @@ class GameScene: SKScene {
         screenTop = screenHeight/2
         gameTop = screenTop - scoreBoardHeight - 1
         screenBottom = -screenHeight/2
+        gameBottom = screenBottom + scoreBoardHeight
+        
+        origin = CGPoint(x: 0 , y: gameBottom)
+        lineOrigin = CGPoint(x: 0 , y: gameBottom)
         
         let scoreBoardNode = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth + 2, height: scoreBoardHeight + 1))
         scoreBoardNode.position = CGPoint(x: 0, y: screenTop - scoreBoardHeight / 2.0 + 1)
@@ -88,6 +91,13 @@ class GameScene: SKScene {
         goal!.lineWidth = 2
         addChild(goal!)
         
+        let bottomBar = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth + 2, height: scoreBoardHeight + 1))
+        bottomBar.position = CGPoint(x: 0, y: gameBottom - scoreBoardHeight / 2.0 - 1)
+        bottomBar.fillColor = scoreColor
+        bottomBar.lineWidth = 2
+        bottomBar.zPosition = 1
+        addChild(bottomBar)
+        
         startGame()
     }
     
@@ -106,7 +116,7 @@ class GameScene: SKScene {
         ball?.node.removeFromParent()
         ball = nil
         
-        let gameBottom = screenBottom + bottomMargin
+        let generationBottom = gameBottom + bottomMargin
         
         ballLoop: for _ in 1...Int.random(in: 3...6) {
             var position: CGPoint
@@ -119,7 +129,7 @@ class GameScene: SKScene {
                 }
                 
                 position = generateRandomSeedCircleLocation(
-                    gameBottom: gameBottom
+                    generationBottom: generationBottom
                 )
 
                 // See if it is too far from the walls
@@ -149,7 +159,7 @@ class GameScene: SKScene {
         }
     }
     
-    func generateRandomSeedCircleLocation(gameBottom: CGFloat) -> CGPoint {
+    func generateRandomSeedCircleLocation(generationBottom: CGFloat) -> CGPoint {
         let gracefulMargin = CGFloat(300)
         var xPosition: CGFloat
         var yPosition: CGFloat
@@ -168,10 +178,10 @@ class GameScene: SKScene {
         }
         
         xClampedPosition = [CGFloat.random(in: screenLeft+circleMinSize...screenLeft+margin), CGFloat.random(in: screenRight-margin...screenRight-circleMinSize)].randomElement()!
-        yClampedPosition = [CGFloat.random(in: gameBottom+circleMinSize...gameBottom+margin), CGFloat.random(in: gameTop-margin...gameTop-circleMinSize)].randomElement()!
+        yClampedPosition = [CGFloat.random(in: gameBottom+circleMinSize...generationBottom+margin), CGFloat.random(in: gameTop-margin...gameTop-circleMinSize)].randomElement()!
 
         xUnclampedPosition = CGFloat.random(in: screenLeft+circleMinSize...screenRight-circleMinSize)
-        yUnclampedPosition = CGFloat.random(in: gameBottom+circleMinSize...gameTop-circleMinSize)
+        yUnclampedPosition = CGFloat.random(in: generationBottom+circleMinSize...gameTop-circleMinSize)
 
         if (Bool.random()) {
             xPosition = xClampedPosition
@@ -193,7 +203,7 @@ class GameScene: SKScene {
         
         let walls = [
             CGPoint(x: screenLeft, y: from.y), CGPoint(x: screenRight, y: from.y),
-            CGPoint(x: from.x, y: screenBottom), CGPoint(x: from.x, y: gameTop)
+            CGPoint(x: from.x, y: gameBottom), CGPoint(x: from.x, y: gameTop)
         ]
         
         for circle in circles {
@@ -264,8 +274,10 @@ class GameScene: SKScene {
         let label = SKLabelNode.init(text: String(health))
         label.fontSize = size * fontScalingFactor
         label.fontColor = color
-        label.fontName = "MarkerFelt-Wide"
-//        label.fontName = "HelveticaNeue-Bold"
+//        label.fontName = "SanFranciscoUIDisplay"
+//        label.fontName = "MarkerFelt-Wide"
+//        label.fontName = "HelveticaNeue-UltraLight"
+        label.fontName = "HelveticaNeue-Light"
 //        label.fontName = "AppleSDGothicNeo-Bold"
 //        label.fontName = "Chalkduster"
 //        label.fontName = "ChalkboardSE-Bold"
@@ -472,18 +484,27 @@ class GameScene: SKScene {
 
                 // collision with walls
                 let ballCenter = ballPosition
+                var ballCollided = false
 
                 if ballCenter.x - ballRadius < screenLeft && ball!.velocity.dx < 0 {
                     ball!.velocity.dx = abs(ball!.velocity.dx)
+                    ballCollided = true
                 }
                 else if ballCenter.x + ballRadius > screenRight && ball!.velocity.dx > 0 {
                     ball!.velocity.dx = -abs(ball!.velocity.dx)
+                    ballCollided = true
                 }
-                else if ballCenter.y - ballRadius < screenBottom && ball!.velocity.dy < 0 {
+                else if ballCenter.y - ballRadius < gameBottom && ball!.velocity.dy < 0 {
                     ball!.velocity.dy = abs(ball!.velocity.dy)
+                    ballCollided = true
                 }
                 else if ballCenter.y + ballRadius > gameTop && ball!.velocity.dy > 0 {
                     ball!.velocity.dy = -abs(ball!.velocity.dy)
+                    ballCollided = true
+                }
+                if ballCollided {
+                    let generator = UIImpactFeedbackGenerator(style: .rigid)
+                    generator.impactOccurred()
                 }
 
                 // collision with other circles
