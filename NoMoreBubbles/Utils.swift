@@ -63,3 +63,22 @@ extension CGVector {
         return dx * otherVector.dx + dy * otherVector.dy
     }
 }
+
+func CGDistance(from: CGPoint, to: CGPoint) -> CGFloat {
+    return sqrt((from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y))
+}
+
+func getVelocity(withDeltas deltas: CGPoint, withSpeed speed: CGFloat) -> CGVector {
+    let theta = atan(deltas.y / deltas.x)
+    
+    var VX = speed * cos(theta)
+    if deltas.x < 0 {
+        VX = -VX
+    }
+    var VY = speed * abs(sin(theta)) // Fuck trig
+    if deltas.y < 0 {
+        VY = -VY
+    }
+    
+    return CGVector(dx: VX, dy: VY)
+}

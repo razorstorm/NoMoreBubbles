@@ -41,7 +41,8 @@ class GameScene: SKScene {
     private var explosions: [Explosion] = []
     private let lineScalingFactor: CGFloat = 0.085
     private let fontScalingFactor: CGFloat = 1.6
-    private let scoreFontSize: CGFloat = 80
+    private let levelFontSize: CGFloat = 80
+    private let circleScoreFontSize: CGFloat = 40
     private let colors: [SKColor] = [SKColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0), SKColor.cyan, SKColor(red: 0.2, green: 0.9, blue: 0.2, alpha: 1.0), SKColor.yellow, SKColor(red: 0.45, green: 0.45, blue: 1.0, alpha: 1.0), SKColor.lightGray, SKColor.orange]
     private let maxCircleSize: CGFloat = 170.0
     private var ball: Ball?
@@ -74,8 +75,8 @@ class GameScene: SKScene {
     
     private let physicsFrameRate: CGFloat = 1/60.0
     
-    private let bgColor: SKColor = SKColor.init(red: 0.15, green: 0.15, blue: 0.15, alpha: 1.0)
-    private let scoreColor: SKColor = SKColor.init(red: 0.20, green: 0.15, blue: 0.20, alpha: 1.0)
+    private let bgColor: SKColor = SKColor.init(red: 0.20, green: 0.15, blue: 0.20, alpha: 1.0)
+    private let scoreColor: SKColor = SKColor.init(red: 0.25, green: 0.15, blue: 0.25, alpha: 1.0)
     
     override func didMove(to view: SKView) {
         let bottomBarHeight: CGFloat = 70
@@ -100,15 +101,37 @@ class GameScene: SKScene {
         scoreBoardNode.fillColor = scoreColor
         
         let label = SKLabelNode.init(text: String(0))
-        label.fontSize = scoreFontSize
+        label.fontSize = levelFontSize
         label.position = CGPoint(x: 0, y: screenTop - 110)
         label.fontColor = SKColor.white
         label.zPosition = 1
+
+        let accumScoreLabel = SKLabelNode.init(text: String(0))
+        accumScoreLabel.fontSize = circleScoreFontSize
+        accumScoreLabel.position = CGPoint(x: screenRight - 50, y: screenTop - 110)
+        accumScoreLabel.fontColor = SKColor.white
+        accumScoreLabel.zPosition = 1
         
+        let currentScoreLabel = SKLabelNode.init(text: String(0))
+        currentScoreLabel.fontSize = circleScoreFontSize
+        currentScoreLabel.position = CGPoint(x: screenLeft + 50, y: screenTop - 110)
+        currentScoreLabel.fontColor = SKColor.white
+        currentScoreLabel.zPosition = 1
+
         addChild(scoreBoardNode)
         addChild(label)
-        
-        scoreBoard = ScoreBoard.init(fromNode: scoreBoardNode, fromScore: 0, fromLabel: label)
+        addChild(accumScoreLabel)
+        addChild(currentScoreLabel)
+
+        scoreBoard = ScoreBoard.init(
+            fromNode: scoreBoardNode,
+            fromLevel: 0,
+            fromLevelLabel: label,
+            fromAccumScore: 0,
+            fromAccumScoreLabel: accumScoreLabel,
+            fromCurrentScore: 0,
+            fromCurrentScoreLabel: currentScoreLabel
+        )
         
         goal = SKShapeNode(circleOfRadius: goalRadius)
         goal!.position = origin!
@@ -132,8 +155,7 @@ class GameScene: SKScene {
         let bottomMargin = CGFloat(50)
         let maxRounds = 10000
 
-        scoreBoard?.score = 0
-        scoreBoard!.labelNode.text = String(scoreBoard!.score)
+        scoreBoard?.resetValues()
 
         for circle in circles {
             circle.node.removeAllChildren()
@@ -219,10 +241,6 @@ class GameScene: SKScene {
         }
         
         return CGPoint(x: xPosition, y: yPosition)
-    }
-    
-    func CGDistance(from: CGPoint, to: CGPoint) -> CGFloat {
-        return sqrt((from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y))
     }
     
     func closestDistance(from: CGPoint) -> CGFloat {
@@ -328,21 +346,6 @@ class GameScene: SKScene {
         }
     }
     
-    func getVelocity(withDeltas deltas: CGPoint, withSpeed speed: CGFloat) -> CGVector {
-        let theta = atan(deltas.y / deltas.x)
-        
-        var VX = speed * cos(theta)
-        if deltas.x < 0 {
-            VX = -VX
-        }
-        var VY = speed * abs(sin(theta)) // Fuck trig
-        if deltas.y < 0 {
-            VY = -VY
-        }
-        
-        return CGVector(dx: VX, dy: VY)
-    }
-    
     func normalizeVector(vector: CGVector) -> CGVector {
         let len = CGDistance(from: CGPoint(x: 0, y: 0), to: CGPoint(x: vector.dx, y: vector.dy))
         return len > 0 ? CGVector(dx: vector.dx / len, dy: vector.dy / len) : CGVector.zero
@@ -365,6 +368,9 @@ class GameScene: SKScene {
                 ball = Ball(fromNode: node, withVelocity: velocity, withSpeed: ballInitialSpeed)
                 
                 addChild(node)
+                
+                scoreBoard?.updateAccumScore(newScore: scoreBoard!.accumScore + adjustScorePerRound(score: scoreBoard!.currentScore))
+                scoreBoard?.updateCurrentScore(newScore: 0)
             }
         } else {
             startGame()
@@ -394,9 +400,12 @@ class GameScene: SKScene {
             createCircle(atPoint: ball!.node.position)
         }
         ball = nil
+        
+        scoreBoard?.updateLevel(newLevel: scoreBoard!.level + 1)
+    }
     
-        scoreBoard!.score += 1
-        scoreBoard!.labelNode.text = String(scoreBoard!.score)
+    func adjustScorePerRound(score: Int) -> Int {
+        return Int(pow(Double(score), 2.0))
     }
     
     func damageCircle(circle: Circle, withIndex i: Int) {
@@ -409,6 +418,7 @@ class GameScene: SKScene {
         
         if circle.health == 0 {
             self.circles.remove(at: i)
+            scoreBoard?.updateCurrentScore(newScore: scoreBoard!.currentScore + 1)
             
             let actions = SKAction.group([
                 SKAction.scale(by: 0, duration: 0.5),
