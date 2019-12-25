@@ -92,10 +92,10 @@ class GameScene: SKScene {
         let bottomMargin = CGFloat(250)
         let circleMinSize = CGFloat(15)
         let circleMaxSize = CGFloat(50)
-        let margin = CGFloat(100)
+        let margin = CGFloat(70)
         let maxRounds = 10000
 
-        ballLoop: for i in 2...5 {
+        ballLoop: for _ in 4...6 {
             var xPosition: CGFloat
             var yPosition: CGFloat
             var position: CGPoint
@@ -112,32 +112,18 @@ class GameScene: SKScene {
                 } else {
                     xPosition = [CGFloat.random(in: screenLeft+circleMinSize...screenLeft+margin), CGFloat.random(in: screenRight-margin...screenRight-circleMinSize)].randomElement()!
                     yPosition = [CGFloat.random(in: screenBottom+circleMinSize+bottomMargin...screenBottom+bottomMargin+margin), CGFloat.random(in: gameTop-margin...gameTop-circleMinSize)].randomElement()!
-//                    xPosition = CGFloat.random(in: screenLeft+circleMinSize...screenRight-circleMinSize)
-//                    yPosition = CGFloat.random(in: screenBottom+bottomMargin+circleMinSize...gameTop - circleMinSize)
                 }
                 position = CGPoint(x: xPosition, y: yPosition)
                 for circle in circles {
-                    print(circle.health, CGDistance(from: position, to: circle.node.position), circle.radius)
                     // If this is inside any of the other circles, then we haven't found a valid position yet. Keep looking
                     if CGDistance(from: position, to: circle.node.position) <= circle.radius + circleMinSize {
                         invalidPosition = true
                     }
-//                    let tooFarFromBall = CGDistance(from: position, to: circle.node.position) > circle.radius + circleMaxSize
-//                    let tooFarFromWalls = xPosition - screenLeft > circleMaxSize || screenRight - xPosition > circleMaxSize ||
-//                        yPosition - (screenBottom + bottomMargin) > circleMaxSize || gameTop - yPosition > circleMaxSize
-////                    if tooFarFromBall {
-////                        invalidPosition = true
-////                    }
-//                    if tooFarFromBall && tooFarFromWalls {
-//                        invalidPosition = true
-//                    }
                 }
                 rounds+=1
             } while (invalidPosition)
 
-            print(position)
-            createCircle(atPoint: position, withHealth: i)
-            print("================")
+            createCircle(atPoint: position)
         }
     }
     
