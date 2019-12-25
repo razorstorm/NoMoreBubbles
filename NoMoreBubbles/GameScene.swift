@@ -62,6 +62,9 @@ class GameScene: SKScene {
     private let circleMinSize: CGFloat = 15
     private let circleMaxSize: CGFloat = 70
     
+    private var lastParticleAt: CGPoint?
+    private var particleDistance: CGFloat = 30
+    
     private var scoreBoard: ScoreBoard?
     private let scoreBoardHeight: CGFloat = 130
     
@@ -103,7 +106,7 @@ class GameScene: SKScene {
         label.fontSize = levelFontSize
         label.position = CGPoint(x: 0, y: screenTop - 110)
         label.fontColor = SKColor.white
-        label.zPosition = 1
+        label.zPosition = 31
 
         let accumScoreLabel = SKLabelNode.init(text: String(0))
         accumScoreLabel.fontSize = circleScoreFontSize
@@ -503,26 +506,35 @@ class GameScene: SKScene {
     }
     
     func generateParticles(position: CGPoint, color: UIColor = UIColor.white) {
-        if let emitter = SKEmitterNode(fileNamed: "TrailParticle.sks") {
-            emitter.position = ball!.node.position // center of screen
-            emitter.name = "boom"
-            emitter.targetNode = self
-            emitter.zPosition = 10
-            emitter.particleZPosition = 10
-            emitter.numParticlesToEmit = Int.random(in: 5...10)
-            emitter.particleColorSequence = nil
-            emitter.particleColor = color
-            addChild(emitter)
-            
-            let duration = 0.5
-            emitter.run(SKAction.sequence([
-                SKAction.wait(forDuration: 0.0),
-                SKAction.group([
-                    SKAction.scale(by: 0, duration: duration),
-                ]),
-                SKAction.removeFromParent()
-            ]))
+//        let currTime = DispatchTime.now()
+//        let currTimeMs = Double(currTime.uptimeNanoseconds) / 1_000_000 // Technically could
+        
+        if lastParticleAt == nil || CGDistance(from: position, to: lastParticleAt!) > particleDistance {
+//        if currTimeMs >= lastParticleAtMs + particleInterval {
+            if let emitter = SKEmitterNode(fileNamed: "TrailParticle.sks") {
+                emitter.position = ball!.node.position // center of screen
+                emitter.name = "boom"
+                emitter.targetNode = self
+                emitter.zPosition = 10
+                emitter.particleZPosition = 10
+                emitter.numParticlesToEmit = Int.random(in: 5...10)
+                emitter.particleColorSequence = nil
+                emitter.particleColor = color
+                addChild(emitter)
+                
+                let duration = 0.5
+                emitter.run(SKAction.sequence([
+                    SKAction.wait(forDuration: 0.0),
+                    SKAction.group([
+                        SKAction.scale(by: 0, duration: duration),
+                    ]),
+                    SKAction.removeFromParent()
+                ]))
+            }
         }
+        
+        lastParticleAt = position
+//        lastParticleAtMs = currTimeMs
     }
 
     override func update(_ currentTime: TimeInterval) {
