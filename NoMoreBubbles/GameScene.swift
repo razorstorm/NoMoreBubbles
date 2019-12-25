@@ -81,6 +81,7 @@ class GameScene: SKScene {
     private let scoreColor: SKColor = SKColor.init(red: 0.25, green: 0.15, blue: 0.25, alpha: 1.0)
     
     private var powerUps: [PowerUp] = []
+    private var ballsDestroyedThisRound: Int = 0
     
     override func didMove(to view: SKView) {
         let bottomBarHeight: CGFloat = 70
@@ -172,6 +173,8 @@ class GameScene: SKScene {
         for powerUp in powerUps {
             powerUp.node.removeFromParent()
         }
+        
+        ballsDestroyedThisRound = 0
 
         powerUps = []
         
@@ -381,6 +384,7 @@ class GameScene: SKScene {
                 
                 scoreBoard?.updateAccumScore(newScore: scoreBoard!.accumScore + adjustScorePerRound(score: scoreBoard!.currentScore))
                 scoreBoard?.updateCurrentScore(newScore: 0)
+                ballsDestroyedThisRound = 0
             }
         } else {
             startGame()
@@ -413,13 +417,28 @@ class GameScene: SKScene {
         
         scoreBoard?.updateLevel(newLevel: scoreBoard!.level + 1)
         
-//        if scoreBoard!.currentScore > 0 {
+        if ballsDestroyedThisRound > 2 {
             spawnPowerUp()
-//        }
+        }
     }
     
     func adjustScorePerRound(score: Int) -> Int {
         return Int(pow(Double(score), 2.0))
+    }
+    
+    func createExplosion(radius: CGFloat, strokeColor: UIColor, lineWidth: CGFloat, position: CGPoint) -> Explosion {
+        let explosionNode = SKShapeNode.init(circleOfRadius: radius)
+        explosionNode.strokeColor = strokeColor
+        explosionNode.lineWidth = lineWidth
+        explosionNode.alpha = 0.5
+        explosionNode.isAntialiased = true
+        explosionNode.position = position
+        explosionNode.glowWidth = 1/5
+        let explosion = Explosion.init(withNode: explosionNode)
+        explosions.append(explosion)
+
+        addChild(explosionNode)
+        return explosion
     }
     
     func damageCircle(circle: Circle, withIndex i: Int) {
@@ -433,6 +452,7 @@ class GameScene: SKScene {
         if circle.health == 0 {
             self.circles.remove(at: i)
             scoreBoard?.updateCurrentScore(newScore: scoreBoard!.currentScore + 1)
+            ballsDestroyedThisRound += 1
 
             let actions = SKAction.group([
                 SKAction.scale(by: 0, duration: 0.5),
@@ -444,19 +464,11 @@ class GameScene: SKScene {
                 circle.labelNode.removeFromParent()
             })
 
-            let explosionNode = SKShapeNode.init(circleOfRadius: circle.radius / 5.0)
-            explosionNode.strokeColor = circle.node.strokeColor
-            explosionNode.lineWidth = circle.node.lineWidth / 5.0
-            explosionNode.alpha = 0.5
-            explosionNode.isAntialiased = true
-            explosionNode.position = circle.node.position
-            explosionNode.glowWidth = 1/5
-            let explosion = Explosion.init(withNode: explosionNode)
-            explosions.append(explosion)
+            let explosion = createExplosion(
+                radius: circle.radius / 5.0, strokeColor: circle.node.strokeColor, lineWidth: circle.node.lineWidth / 5.0, position: circle.node.position
+            )
 
-            addChild(explosionNode)
-
-            explosionNode.run(SKAction.sequence([
+            explosion.node.run(SKAction.sequence([
                 SKAction.group([
                     SKAction.fadeAlpha(to: 0.2, duration: 1.6),
                     SKAction.scale(by: 10, duration: 1.6),
@@ -535,17 +547,35 @@ class GameScene: SKScene {
         }
     }
     
-    func spawnPowerUp() {
+    func powerUpColorForType(type: PowerUpType) -> SKColor {
+        switch type {
+            case .resetSpeed: return SKColor.blue
+            case .shock: return SKColor.red
+            case .superBounce: return SKColor.green
+        }
+    }
+    
+    func spawnPowerUp(ballsHit: Int = 0) {
         let radius = 15
+        var powerUpType = PowerUpType.resetSpeed
+        
+        switch ballsDestroyedThisRound {
+            case 2:
+                powerUpType = PowerUpType.shock
+            case 3:
+                powerUpType = PowerUpType.resetSpeed
+            default:
+                powerUpType = PowerUpType.superBounce
+        }
+        
         let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
         powerUpNode.position = generateRandomValidPowerUpLocation()
-        powerUpNode.strokeColor = SKColor.white
-//        goal!.fillColor = UIColor.green.withAlphaComponent(0.1)
+        powerUpNode.strokeColor = powerUpColorForType(type: powerUpType)
         powerUpNode.isAntialiased = true
-        powerUpNode.lineWidth = 2
+        powerUpNode.lineWidth = 4
         addChild(powerUpNode)
 
-        let powerUp = PowerUp(withNode: powerUpNode, type: PowerUpType.resetSpeed, radius: radius)
+        let powerUp = PowerUp(withNode: powerUpNode, type: powerUpType, radius: radius)
         powerUps.append(powerUp)
     }
     
