@@ -7,6 +7,31 @@
 //
 
 // TODO: powerups, add particles, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
+// Scores: destroying circles updates the score.
+
+// Power up ideas:
+// On bounce from circles, speeds up. make circles glowing or something
+// Large shockwave from position
+// A few random circles lose a random amount of health
+// Fast ball with no deceleration for certain amount of time
+// Large ball
+// Small ball
+// Stops ball in place
+// Will not generate a new circle on stop. ball light gray or something
+// Damage aura larger than ball
+// Increases a circle's health by 1 instead of decrease on hit by ball
+// Ball will deal 2 damage instead of 1 to circle, speed is also reset back to launch speed. Ball glowing red
+// Instant kill the next circle hit. Ball turns into a skull
+// Medium sized shockwave on ball stop.
+// Small shockwave on each ball bounce
+// Shockwaves will deal 2 damage
+// Shockwaves deal 0 damage
+// Instantly destroy X circles
+// Clears entire screen
+// Ball stops in place and creates medium sized shockwave and a new circle
+// Changes all circle's health to 1
+// Changes all circle's health to 5
+// Creates a circle in place
 
 import SpriteKit
 import GameplayKit
@@ -15,7 +40,7 @@ class GameScene: SKScene {
     private var circles: [Circle] = []
     private var explosions: [Explosion] = []
     private let lineScalingFactor: CGFloat = 0.085
-    private let fontScalingFactor: CGFloat = 1.3
+    private let fontScalingFactor: CGFloat = 1.6
     private let scoreFontSize: CGFloat = 80
     private let colors: [SKColor] = [SKColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0), SKColor.cyan, SKColor(red: 0.2, green: 0.9, blue: 0.2, alpha: 1.0), SKColor.yellow, SKColor(red: 0.45, green: 0.45, blue: 1.0, alpha: 1.0), SKColor.lightGray, SKColor.orange]
     private let maxCircleSize: CGFloat = 170.0
@@ -271,6 +296,7 @@ class GameScene: SKScene {
         node.strokeColor = color
         node.lineWidth = size * lineScalingFactor
         node.isAntialiased = true
+        node.fillColor = color.withAlphaComponent(0.05)
         
         let health = (expectedHealth != nil ? expectedHealth : Int.random(in: 4..<7))!
         let label = SKLabelNode.init(text: String(health))
