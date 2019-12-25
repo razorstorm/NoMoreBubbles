@@ -9,8 +9,8 @@
 // TODO: powerups, add particles, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
 
 // Power up ideas:
-// On bounce from circles, speeds up. make circles glowing or something
-// Large shockwave from position
+// SuperBounce On bounce from circles, speeds up. make circles glowing or something
+// Shock Large shockwave from position
 // A few random circles lose a random amount of health
 // Fast ball with no deceleration for certain amount of time
 // Large ball
@@ -79,6 +79,8 @@ class GameScene: SKScene {
     
     private let bgColor: SKColor = SKColor.init(red: 0.20, green: 0.15, blue: 0.20, alpha: 1.0)
     private let scoreColor: SKColor = SKColor.init(red: 0.25, green: 0.15, blue: 0.25, alpha: 1.0)
+    
+    private var powerUps: [PowerUp] = []
     
     override func didMove(to view: SKView) {
         let bottomBarHeight: CGFloat = 70
@@ -166,6 +168,12 @@ class GameScene: SKScene {
         circles = []
         ball?.node.removeFromParent()
         ball = nil
+        
+        for powerUp in powerUps {
+            powerUp.node.removeFromParent()
+        }
+
+        powerUps = []
         
         let generationBottom = gameBottom + bottomMargin
         
@@ -404,6 +412,10 @@ class GameScene: SKScene {
         ball = nil
         
         scoreBoard?.updateLevel(newLevel: scoreBoard!.level + 1)
+        
+//        if scoreBoard!.currentScore > 0 {
+            spawnPowerUp(atPos: CGPoint(x:0, y:0))
+//        }
     }
     
     func adjustScorePerRound(score: Int) -> Int {
@@ -417,11 +429,11 @@ class GameScene: SKScene {
             SKAction.scale(by: 0.9, duration: 0.1),
             SKAction.scale(by: 1.1111111111, duration: 0.1),
         ]))
-        
+
         if circle.health == 0 {
             self.circles.remove(at: i)
             scoreBoard?.updateCurrentScore(newScore: scoreBoard!.currentScore + 1)
-            
+
             let actions = SKAction.group([
                 SKAction.scale(by: 0, duration: 0.5),
                 SKAction.fadeOut(withDuration: 0.5)
@@ -441,9 +453,9 @@ class GameScene: SKScene {
             explosionNode.glowWidth = 1/5
             let explosion = Explosion.init(withNode: explosionNode)
             explosions.append(explosion)
-            
+
             addChild(explosionNode)
-            
+
             explosionNode.run(SKAction.sequence([
                 SKAction.group([
                     SKAction.fadeAlpha(to: 0.2, duration: 1.6),
@@ -458,11 +470,11 @@ class GameScene: SKScene {
             )
         }
     }
-    
+
     func onCollideWithCircle(ballCenter: CGPoint, circle: Circle, withIndex i: Int) -> CGPoint {
         let collisionVector = normalizeVector(vector: CGVector(dx: ballCenter.x - circle.node.position.x , dy: ballCenter.y - circle.node.position.y))
         let normalizedVelocity = normalizeVector(vector: ball!.velocity)
-        
+
         let tangent = normalizeVector(vector: CGVector(dx: circle.node.position.y - ballCenter.y, dy: ballCenter.x - circle.node.position.x))
         let length = normalizedVelocity.dot(tangent)
         let velocityComponentOnTangent = length * tangent
@@ -475,23 +487,20 @@ class GameScene: SKScene {
         let distance = ballRadius + circle.radius
         let collisionPosition = CGPoint(x: circle.node.position.x + collisionVector.dx * distance, y: circle.node.position.y + collisionVector.dy * distance)
         let ballPosition = collisionPosition
-        
+
         damageCircle(circle: circle, withIndex: i)
-        
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
-        
+
         generateParticles(position: ball!.node.position, color: circle.node.fillColor.withAlphaComponent(1.0))
-        
+
         return ballPosition
     }
-    
+
     func scaledAcceleration(speed: CGFloat) -> CGFloat {
         let normalizedSpeed = speed / ballInitialSpeed
         let accel = ballAcceleration * normalizedSpeed
         return min(-0.05, accel)
     }
-    
+
     func updateExplosions() {
         for explosion in explosions {
             for (i, circle) in circles.enumerated() {
@@ -505,10 +514,46 @@ class GameScene: SKScene {
         }
     }
     
+    func activatePowerUp(powerUp: PowerUp, index: Int) {
+        switch powerUp.type {
+            case PowerUpType.resetSpeed: ball!.speed = ballInitialSpeed
+            case .superBounce:
+                break
+            case .shock:
+                break
+        }
+        
+        powerUp.node.removeFromParent()
+        powerUps.removeAll(where: { $0 == powerUp })
+    }
+
+    func checkPowerUpCollisions(ballPosition: CGPoint) {
+        print(powerUps)
+        for (i, powerUp) in powerUps.enumerated() {
+            if CGDistance(from: ballPosition, to: powerUp.node.position) <= CGFloat(powerUp.radius) + ballRadius {
+                activatePowerUp(powerUp: powerUp, index: i)
+            }
+        }
+    }
+    
+    func spawnPowerUp(atPos: CGPoint) {
+        let radius = 15
+        let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
+        powerUpNode.position = atPos
+        powerUpNode.strokeColor = SKColor.white
+//        goal!.fillColor = UIColor.green.withAlphaComponent(0.1)
+        powerUpNode.isAntialiased = true
+        powerUpNode.lineWidth = 2
+        addChild(powerUpNode)
+
+        let powerUp = PowerUp(withNode: powerUpNode, type: PowerUpType.resetSpeed, radius: radius)
+        powerUps.append(powerUp)
+    }
+
     func generateParticles(position: CGPoint, color: UIColor = UIColor.white) {
 //        let currTime = DispatchTime.now()
 //        let currTimeMs = Double(currTime.uptimeNanoseconds) / 1_000_000 // Technically could
-        
+
         if lastParticleAt == nil || CGDistance(from: position, to: lastParticleAt!) > particleDistance {
 //        if currTimeMs >= lastParticleAtMs + particleInterval {
             if let emitter = SKEmitterNode(fileNamed: "TrailParticle.sks") {
@@ -521,7 +566,7 @@ class GameScene: SKScene {
                 emitter.particleColorSequence = nil
                 emitter.particleColor = color
                 addChild(emitter)
-                
+
                 let duration = 0.5
                 emitter.run(SKAction.sequence([
                     SKAction.wait(forDuration: 0.0),
@@ -532,9 +577,37 @@ class GameScene: SKScene {
                 ]))
             }
         }
-        
+
         lastParticleAt = position
 //        lastParticleAtMs = currTimeMs
+        
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+    }
+    
+    func checkWallCollisions(ballPosition: CGPoint) {
+        // collision with walls
+        var ballCollided = false
+
+        if ballPosition.x - ballRadius <= screenLeft && ball!.velocity.dx < 0 {
+            ball!.velocity.dx = abs(ball!.velocity.dx)
+            ballCollided = true
+        }
+        else if ballPosition.x + ballRadius >= screenRight && ball!.velocity.dx > 0 {
+            ball!.velocity.dx = -abs(ball!.velocity.dx)
+            ballCollided = true
+        }
+        else if ballPosition.y - ballRadius <= gameBottom && ball!.velocity.dy < 0 {
+            ball!.velocity.dy = abs(ball!.velocity.dy)
+            ballCollided = true
+        }
+        else if ballPosition.y + ballRadius >= gameTop && ball!.velocity.dy > 0 {
+            ball!.velocity.dy = -abs(ball!.velocity.dy)
+            ballCollided = true
+        }
+        if ballCollided {
+            generateParticles(position: ball!.node.position)
+        }
     }
 
     override func update(_ currentTime: TimeInterval) {
@@ -553,37 +626,17 @@ class GameScene: SKScene {
                     y: ball!.node.position.y + ball!.velocity.dy * frameScalingFactor
                 )
                 ball!.speed += scaledAcceleration(speed: ball!.speed) // ballAcceleration
-
                 ball!.velocity = ball!.speed * normalizeVector(vector: ball!.velocity)
 
-                // collision with walls
-                let ballCenter = ballPosition
-                var ballCollided = false
-
-                if ballCenter.x - ballRadius <= screenLeft && ball!.velocity.dx < 0 {
-                    ball!.velocity.dx = abs(ball!.velocity.dx)
-                    ballCollided = true
-                }
-                else if ballCenter.x + ballRadius >= screenRight && ball!.velocity.dx > 0 {
-                    ball!.velocity.dx = -abs(ball!.velocity.dx)
-                    ballCollided = true
-                }
-                else if ballCenter.y - ballRadius <= gameBottom && ball!.velocity.dy < 0 {
-                    ball!.velocity.dy = abs(ball!.velocity.dy)
-                    ballCollided = true
-                }
-                else if ballCenter.y + ballRadius >= gameTop && ball!.velocity.dy > 0 {
-                    ball!.velocity.dy = -abs(ball!.velocity.dy)
-                    ballCollided = true
-                }
-                if ballCollided {
-                    generateParticles(position: ball!.node.position)
-                }
+                let originalBallPosition = ballPosition
+                checkWallCollisions(ballPosition: ballPosition)
+                
+                checkPowerUpCollisions(ballPosition: ballPosition)
 
                 // collision with other circles
                 for (i,circle) in circles.enumerated() {
-                    if CGDistance(from: ballCenter, to: circle.node.position) <= circle.radius + ballRadius {
-                        ballPosition = onCollideWithCircle(ballCenter: ballCenter, circle: circle, withIndex: i)
+                    if CGDistance(from: originalBallPosition, to: circle.node.position) <= circle.radius + ballRadius {
+                        ballPosition = onCollideWithCircle(ballCenter: originalBallPosition, circle: circle, withIndex: i)
                     }
                 }
 

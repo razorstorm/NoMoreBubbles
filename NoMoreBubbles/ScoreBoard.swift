@@ -46,7 +46,7 @@ class ScoreBoard {
     func updateDisplay() {
         levelLabelNode.text = String(level)
         accumScoreLabel.text = String(accumScore)
-        currentScoreLabel.text = String(currentScore)
+        currentScoreLabel.text = String(Int(pow(Double(currentScore), 2.0)))
     }
 
     func updateLevel(newLevel: Int) {
