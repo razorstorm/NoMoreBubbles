@@ -414,7 +414,7 @@ class GameScene: SKScene {
         scoreBoard?.updateLevel(newLevel: scoreBoard!.level + 1)
         
 //        if scoreBoard!.currentScore > 0 {
-            spawnPowerUp(atPos: CGPoint(x:0, y:0))
+            spawnPowerUp()
 //        }
     }
     
@@ -528,7 +528,6 @@ class GameScene: SKScene {
     }
 
     func checkPowerUpCollisions(ballPosition: CGPoint) {
-        print(powerUps)
         for (i, powerUp) in powerUps.enumerated() {
             if CGDistance(from: ballPosition, to: powerUp.node.position) <= CGFloat(powerUp.radius) + ballRadius {
                 activatePowerUp(powerUp: powerUp, index: i)
@@ -536,10 +535,10 @@ class GameScene: SKScene {
         }
     }
     
-    func spawnPowerUp(atPos: CGPoint) {
+    func spawnPowerUp() {
         let radius = 15
         let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
-        powerUpNode.position = atPos
+        powerUpNode.position = generateRandomValidPowerUpLocation()
         powerUpNode.strokeColor = SKColor.white
 //        goal!.fillColor = UIColor.green.withAlphaComponent(0.1)
         powerUpNode.isAntialiased = true
@@ -549,6 +548,43 @@ class GameScene: SKScene {
         let powerUp = PowerUp(withNode: powerUpNode, type: PowerUpType.resetSpeed, radius: radius)
         powerUps.append(powerUp)
     }
+    
+    func generateRandomValidPowerUpLocation() -> CGPoint {
+        var rounds = 0
+        let maxRounds = 10000
+        var invalidPosition = false
+        var position: CGPoint = origin!
+        repeat {
+            invalidPosition = false
+            if (rounds > maxRounds) {
+                break
+            }
+            var xPosition: CGFloat
+            var yPosition: CGFloat
+            let margin: CGFloat = 15
+
+            xPosition = CGFloat.random(in: screenLeft+margin...screenRight-margin)
+            yPosition = CGFloat.random(in: gameBottom+margin...gameTop-margin)
+            
+            position = CGPoint(x: xPosition, y: yPosition)
+            
+            // If the position is too close to the goal post we can't spawn circle there
+            if CGDistance(from: origin!, to: position) < goalRadius + margin {
+                invalidPosition = true
+            }
+            
+            for circle in circles {
+                // If this is inside any of the other circles, then we haven't found a valid position yet. Keep looking
+                if CGDistance(from: position, to: circle.node.position) <= circle.radius + margin {
+                    invalidPosition = true
+                }
+            }
+            rounds+=1
+        } while (invalidPosition)
+
+        return position
+    }
+    
 
     func generateParticles(position: CGPoint, color: UIColor = UIColor.white) {
 //        let currTime = DispatchTime.now()
