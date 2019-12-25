@@ -417,16 +417,14 @@ class GameScene: SKScene {
         
         scoreBoard?.updateLevel(newLevel: scoreBoard!.level + 1)
         
-        if ballsDestroyedThisRound > 2 {
-            spawnPowerUp()
-        }
+        spawnPowerUp()
     }
     
     func adjustScorePerRound(score: Int) -> Int {
         return Int(pow(Double(score), 2.0))
     }
     
-    func createExplosion(radius: CGFloat, strokeColor: UIColor, lineWidth: CGFloat, position: CGPoint) -> Explosion {
+    func createExplosion(radius: CGFloat, strokeColor: UIColor, lineWidth: CGFloat, position: CGPoint) {
         let explosionNode = SKShapeNode.init(circleOfRadius: radius)
         explosionNode.strokeColor = strokeColor
         explosionNode.lineWidth = lineWidth
@@ -438,7 +436,19 @@ class GameScene: SKScene {
         explosions.append(explosion)
 
         addChild(explosionNode)
-        return explosion
+        
+        explosion.node.run(SKAction.sequence([
+            SKAction.group([
+                SKAction.fadeAlpha(to: 0.2, duration: 1.6),
+                SKAction.scale(by: 10, duration: 1.6),
+            ]),
+            SKAction.removeFromParent()
+        ]), completion: {
+                if let index = self.explosions.index(of:explosion) {
+                    self.explosions.remove(at: index)
+                }
+            }
+        )
     }
     
     func damageCircle(circle: Circle, withIndex i: Int) {
@@ -464,21 +474,8 @@ class GameScene: SKScene {
                 circle.labelNode.removeFromParent()
             })
 
-            let explosion = createExplosion(
+            createExplosion(
                 radius: circle.radius / 5.0, strokeColor: circle.node.strokeColor, lineWidth: circle.node.lineWidth / 5.0, position: circle.node.position
-            )
-
-            explosion.node.run(SKAction.sequence([
-                SKAction.group([
-                    SKAction.fadeAlpha(to: 0.2, duration: 1.6),
-                    SKAction.scale(by: 10, duration: 1.6),
-                ]),
-                SKAction.removeFromParent()
-            ]), completion: {
-                    if let index = self.explosions.index(of:explosion) {
-                        self.explosions.remove(at: index)
-                    }
-                }
             )
         }
     }
@@ -528,11 +525,12 @@ class GameScene: SKScene {
     
     func activatePowerUp(powerUp: PowerUp, index: Int) {
         switch powerUp.type {
-            case PowerUpType.resetSpeed: ball!.speed = ballInitialSpeed
+            case PowerUpType.resetSpeed:
+                ball!.speed = ballInitialSpeed
             case .superBounce:
                 break
             case .shock:
-                break
+                createExplosion(radius: 50, strokeColor: SKColor.red, lineWidth: 3, position: powerUp.node.position)
         }
         
         powerUp.node.removeFromParent()
@@ -557,10 +555,10 @@ class GameScene: SKScene {
     
     func spawnPowerUp(ballsHit: Int = 0) {
         let radius = 15
-        var powerUpType = PowerUpType.resetSpeed
+        var powerUpType: PowerUpType? = nil
         
         switch ballsDestroyedThisRound {
-            case 2:
+            case 0:
                 powerUpType = PowerUpType.shock
             case 3:
                 powerUpType = PowerUpType.resetSpeed
@@ -568,15 +566,17 @@ class GameScene: SKScene {
                 powerUpType = PowerUpType.superBounce
         }
         
-        let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
-        powerUpNode.position = generateRandomValidPowerUpLocation()
-        powerUpNode.strokeColor = powerUpColorForType(type: powerUpType)
-        powerUpNode.isAntialiased = true
-        powerUpNode.lineWidth = 4
-        addChild(powerUpNode)
+        if powerUpType != nil {
+            let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
+            powerUpNode.position = generateRandomValidPowerUpLocation()
+            powerUpNode.strokeColor = powerUpColorForType(type: powerUpType!)
+            powerUpNode.isAntialiased = true
+            powerUpNode.lineWidth = 4
+            addChild(powerUpNode)
 
-        let powerUp = PowerUp(withNode: powerUpNode, type: powerUpType, radius: radius)
-        powerUps.append(powerUp)
+            let powerUp = PowerUp(withNode: powerUpNode, type: powerUpType!, radius: radius)
+            powerUps.append(powerUp)
+        }
     }
     
     func generateRandomValidPowerUpLocation() -> CGPoint {
