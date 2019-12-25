@@ -37,7 +37,7 @@ class ScoreBoard {
     }
     
     func resetValues() {
-        level = 0
+        level = 1
         currentScore = 0
         accumScore = 0
         updateDisplay()

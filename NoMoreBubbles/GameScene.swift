@@ -100,7 +100,7 @@ class GameScene: SKScene {
         scoreBoardNode.lineWidth = 2
         scoreBoardNode.fillColor = scoreColor
         
-        let label = SKLabelNode.init(text: String(0))
+        let label = SKLabelNode.init(text: String(1))
         label.fontSize = levelFontSize
         label.position = CGPoint(x: 0, y: screenTop - 110)
         label.fontColor = SKColor.white
@@ -125,7 +125,7 @@ class GameScene: SKScene {
 
         scoreBoard = ScoreBoard.init(
             fromNode: scoreBoardNode,
-            fromLevel: 0,
+            fromLevel: 1,
             fromLevelLabel: label,
             fromAccumScore: 0,
             fromAccumScoreLabel: accumScoreLabel,
