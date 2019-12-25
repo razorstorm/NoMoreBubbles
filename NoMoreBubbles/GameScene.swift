@@ -6,7 +6,7 @@
 //  Copyright © 2019 Jason Jiang. All rights reserved.
 //
 
-// TODO: powerups, add particles, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
+// TODO: powerups, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
 
 // Power up ideas:
 // SuperBounce On bounce from circles, speeds up. make circles glowing or something
@@ -558,14 +558,18 @@ class GameScene: SKScene {
         var powerUpType: PowerUpType? = nil
         
         switch ballsDestroyedThisRound {
-            case 0:
+            case 2:
                 powerUpType = PowerUpType.shock
             case 3:
                 powerUpType = PowerUpType.resetSpeed
             default:
-                powerUpType = PowerUpType.superBounce
+                let random = CGFloat.random(in: 0...100)
+                print(random)
+                if random < 10 {
+                    powerUpType = randomPowerUpType()
+                }
         }
-        
+
         if powerUpType != nil {
             let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
             powerUpNode.position = generateRandomValidPowerUpLocation()
@@ -696,7 +700,7 @@ class GameScene: SKScene {
 
                 let originalBallPosition = ballPosition
                 checkWallCollisions(ballPosition: ballPosition)
-                
+
                 checkPowerUpCollisions(ballPosition: ballPosition)
 
                 // collision with other circles

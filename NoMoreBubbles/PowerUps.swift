@@ -26,8 +26,12 @@ class PowerUp: Equatable {
     }
 }
 
-enum PowerUpType {
+enum PowerUpType: UInt32, CaseIterable {
     case superBounce
     case shock
     case resetSpeed
+}
+
+func randomPowerUpType() -> PowerUpType {
+    return PowerUpType(rawValue: arc4random_uniform(UInt32(PowerUpType.allCases.count)))!
 }
