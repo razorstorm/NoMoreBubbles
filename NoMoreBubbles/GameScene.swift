@@ -503,7 +503,7 @@ class GameScene: SKScene {
                     trailNode.fillColor = SKColor.lightGray
                     trailNode.lineWidth = 0
                     trailNode.strokeColor = SKColor.lightGray
-                    trailNode.alpha = 0.5
+                    trailNode.alpha = 1
                     trailNode.isAntialiased = true
                     trailNode.position = trailPosition
                     trailNode.glowWidth = 2
