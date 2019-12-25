@@ -89,27 +89,27 @@ class GameScene: SKScene {
     }
     
     func startGame() {
-//        let margin = CGFloat(50)
-//        let bottomMargin = CGFloat(250)
-//        let circleMinSize = CGFloat(0)
-//        for _ in 2...5 {
-//            var xPosition: CGFloat
-//            var yPosition: CGFloat
-//            var position: CGPoint
-//            var invalidPosition: Bool = true
-//            repeat {
-//                xPosition = CGFloat.random(in: screenLeft+margin...screenRight-margin)
-//                yPosition = CGFloat.random(in: screenBottom+bottomMargin...screenTop-bottomMargin)
-//                position = CGPoint(x: xPosition, y: yPosition)
-//                for circle in circles {
-//                    if CGDistance(from: position, to: circle.node.position) > circle.radius + circleMinSize {
-//                        invalidPosition = false
-//                    }
-//                }
-//            } while (invalidPosition)
-//
-//            createCircle(atPoint: position)
-//        }
+        let margin = CGFloat(50)
+        let bottomMargin = CGFloat(250)
+        let circleMinSize = CGFloat(0)
+        for _ in 2...5 {
+            var xPosition: CGFloat
+            var yPosition: CGFloat
+            var position: CGPoint
+            var invalidPosition: Bool = true
+            repeat {
+                xPosition = CGFloat.random(in: screenLeft+margin...screenRight-margin)
+                yPosition = CGFloat.random(in: screenBottom+bottomMargin...screenTop-bottomMargin)
+                position = CGPoint(x: xPosition, y: yPosition)
+                for circle in circles {
+                    if CGDistance(from: position, to: circle.node.position) > circle.radius + circleMinSize {
+                        invalidPosition = false
+                    }
+                }
+            } while (invalidPosition)
+
+            createCircle(atPoint: position)
+        }
     }
     
     func CGDistance(from: CGPoint, to: CGPoint) -> CGFloat {
