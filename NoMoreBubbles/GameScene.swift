@@ -7,7 +7,6 @@
 //
 
 // TODO: powerups, add particles, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
-// Scores: destroying circles updates the score.
 
 // Power up ideas:
 // On bounce from circles, speeds up. make circles glowing or something
@@ -78,6 +77,8 @@ class GameScene: SKScene {
     private let bgColor: SKColor = SKColor.init(red: 0.20, green: 0.15, blue: 0.20, alpha: 1.0)
     private let scoreColor: SKColor = SKColor.init(red: 0.25, green: 0.15, blue: 0.25, alpha: 1.0)
     
+    private var particleEmitter: CAEmitterLayer?
+    
     override func didMove(to view: SKView) {
         let bottomBarHeight: CGFloat = 70
 
@@ -147,6 +148,22 @@ class GameScene: SKScene {
         bottomBar.lineWidth = 2
         bottomBar.zPosition = 1
         addChild(bottomBar)
+        
+        // Particles
+        
+//        let test = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth, height: screenHeight - (bottomBarHeight + scoreBoardHeight)))
+//        test.position = CGPoint(x: 0, y: -(scoreBoardHeight / 2) + (bottomBarHeight) / 2)
+//        test.fillColor = UIColor.blue.withAlphaComponent(0.4)
+//        test.isAntialiased = true
+//        test.zPosition = 4
+//        addChild(test)
+
+        particleEmitter = CAEmitterLayer()
+        particleEmitter!.emitterPosition = CGPoint(x: 0, y: -(scoreBoardHeight / 2) + (bottomBarHeight) / 2)
+//        particleEmitter.emitterShape = .line
+        particleEmitter!.emitterSize = CGSize(width: screenWidth + 2, height: bottomBarHeight + 1)
+
+        view.layer.addSublayer(particleEmitter!)
         
         startGame()
     }
@@ -524,25 +541,42 @@ class GameScene: SKScene {
                 let ballCenter = ballPosition
                 var ballCollided = false
 
-                if ballCenter.x - ballRadius < screenLeft && ball!.velocity.dx < 0 {
+                if ballCenter.x - ballRadius <= screenLeft && ball!.velocity.dx < 0 {
                     ball!.velocity.dx = abs(ball!.velocity.dx)
                     ballCollided = true
                 }
-                else if ballCenter.x + ballRadius > screenRight && ball!.velocity.dx > 0 {
+                else if ballCenter.x + ballRadius >= screenRight && ball!.velocity.dx > 0 {
                     ball!.velocity.dx = -abs(ball!.velocity.dx)
                     ballCollided = true
                 }
-                else if ballCenter.y - ballRadius < gameBottom && ball!.velocity.dy < 0 {
+                else if ballCenter.y - ballRadius <= gameBottom && ball!.velocity.dy < 0 {
                     ball!.velocity.dy = abs(ball!.velocity.dy)
                     ballCollided = true
                 }
-                else if ballCenter.y + ballRadius > gameTop && ball!.velocity.dy > 0 {
+                else if ballCenter.y + ballRadius >= gameTop && ball!.velocity.dy > 0 {
                     ball!.velocity.dy = -abs(ball!.velocity.dy)
                     ballCollided = true
                 }
                 if ballCollided {
-                    let generator = UIImpactFeedbackGenerator(style: .medium)
-                    generator.impactOccurred()
+                    if let emitter = SKEmitterNode(fileNamed: "TrailParticle.sks") {
+                        emitter.position = ball!.node.position // center of screen
+                        emitter.name = "boom"
+                        emitter.targetNode = self
+                        emitter.zPosition = 10
+                        emitter.particleZPosition = 10
+//                        emitter.emissionAngle = 
+                        addChild(emitter)
+                        
+                        let duration = 3.0
+                        emitter.run(SKAction.sequence([
+                            SKAction.wait(forDuration: 0.0),
+                            SKAction.group([
+//                                SKAction.fadeOut(withDuration: duration)
+                                SKAction.scale(by: 0, duration: duration),
+                            ]),
+                            SKAction.removeFromParent()
+                        ]))
+                    }
                 }
 
                 // collision with other circles
