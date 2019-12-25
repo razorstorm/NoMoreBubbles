@@ -89,26 +89,55 @@ class GameScene: SKScene {
     }
     
     func startGame() {
-        let margin = CGFloat(50)
         let bottomMargin = CGFloat(250)
-        let circleMinSize = CGFloat(0)
-        for _ in 2...5 {
+        let circleMinSize = CGFloat(15)
+        let circleMaxSize = CGFloat(50)
+        let margin = CGFloat(100)
+        let maxRounds = 10000
+
+        ballLoop: for i in 2...5 {
             var xPosition: CGFloat
             var yPosition: CGFloat
             var position: CGPoint
-            var invalidPosition: Bool = true
+            var invalidPosition: Bool = false
+            var rounds: Int = 0
             repeat {
-                xPosition = CGFloat.random(in: screenLeft+margin...screenRight-margin)
-                yPosition = CGFloat.random(in: screenBottom+bottomMargin...screenTop-bottomMargin)
+                invalidPosition = false
+                if (rounds > maxRounds) {
+                    continue ballLoop
+                }
+                if circles.count == 0 {
+                    xPosition = [CGFloat.random(in: screenLeft+circleMinSize...screenLeft+circleMaxSize), CGFloat.random(in: screenRight-circleMaxSize...screenRight-circleMinSize)].randomElement()!
+                    yPosition = [CGFloat.random(in: screenBottom+circleMinSize+bottomMargin...screenBottom+bottomMargin+circleMaxSize), CGFloat.random(in: gameTop-circleMaxSize...gameTop-circleMinSize)].randomElement()!
+                } else {
+                    xPosition = [CGFloat.random(in: screenLeft+circleMinSize...screenLeft+margin), CGFloat.random(in: screenRight-margin...screenRight-circleMinSize)].randomElement()!
+                    yPosition = [CGFloat.random(in: screenBottom+circleMinSize+bottomMargin...screenBottom+bottomMargin+margin), CGFloat.random(in: gameTop-margin...gameTop-circleMinSize)].randomElement()!
+//                    xPosition = CGFloat.random(in: screenLeft+circleMinSize...screenRight-circleMinSize)
+//                    yPosition = CGFloat.random(in: screenBottom+bottomMargin+circleMinSize...gameTop - circleMinSize)
+                }
                 position = CGPoint(x: xPosition, y: yPosition)
                 for circle in circles {
-                    if CGDistance(from: position, to: circle.node.position) > circle.radius + circleMinSize {
-                        invalidPosition = false
+                    print(circle.health, CGDistance(from: position, to: circle.node.position), circle.radius)
+                    // If this is inside any of the other circles, then we haven't found a valid position yet. Keep looking
+                    if CGDistance(from: position, to: circle.node.position) <= circle.radius + circleMinSize {
+                        invalidPosition = true
                     }
+//                    let tooFarFromBall = CGDistance(from: position, to: circle.node.position) > circle.radius + circleMaxSize
+//                    let tooFarFromWalls = xPosition - screenLeft > circleMaxSize || screenRight - xPosition > circleMaxSize ||
+//                        yPosition - (screenBottom + bottomMargin) > circleMaxSize || gameTop - yPosition > circleMaxSize
+////                    if tooFarFromBall {
+////                        invalidPosition = true
+////                    }
+//                    if tooFarFromBall && tooFarFromWalls {
+//                        invalidPosition = true
+//                    }
                 }
+                rounds+=1
             } while (invalidPosition)
 
-            createCircle(atPoint: position)
+            print(position)
+            createCircle(atPoint: position, withHealth: i)
+            print("================")
         }
     }
     
@@ -179,7 +208,7 @@ class GameScene: SKScene {
         line!.path = path
     }
     
-    func createCircle(atPoint pos: CGPoint) {
+    func createCircle(atPoint pos: CGPoint, withHealth expectedHealth: Int? = nil) {
         let size = closestDistance(from: pos)
         let node = SKShapeNode.init(circleOfRadius: size)
         node.position = pos
@@ -188,7 +217,7 @@ class GameScene: SKScene {
         node.lineWidth = size * lineScalingFactor
         node.isAntialiased = true
         
-        let health = Int.random(in: 4..<7)
+        let health = (expectedHealth != nil ? expectedHealth : Int.random(in: 4..<7))!
         let label = SKLabelNode.init(text: String(health))
         label.fontSize = size * fontScalingFactor
         label.fontColor = color
