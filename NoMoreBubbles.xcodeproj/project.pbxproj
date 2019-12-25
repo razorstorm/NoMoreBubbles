@@ -22,6 +22,7 @@
 		96E2A0A723B062EC004EC14A /* ScoreBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2A0A623B062EC004EC14A /* ScoreBoard.swift */; };
 		96E2A0A923B06330004EC14A /* Explosion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2A0A823B06330004EC14A /* Explosion.swift */; };
 		96E2A0AB23B063AC004EC14A /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2A0AA23B063AC004EC14A /* Utils.swift */; };
+		96E2A0AF23B3F992004EC14A /* MyParticle.sks in Resources */ = {isa = PBXBuildFile; fileRef = 96E2A0AE23B3F992004EC14A /* MyParticle.sks */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,7 @@
 		96E2A0A623B062EC004EC14A /* ScoreBoard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScoreBoard.swift; sourceTree = "<group>"; };
 		96E2A0A823B06330004EC14A /* Explosion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosion.swift; sourceTree = "<group>"; };
 		96E2A0AA23B063AC004EC14A /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		96E2A0AE23B3F992004EC14A /* MyParticle.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = MyParticle.sks; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +112,7 @@
 				967387B022DFC096001940D2 /* Assets.xcassets */,
 				967387B222DFC096001940D2 /* LaunchScreen.storyboard */,
 				967387AD22DFC094001940D2 /* Main.storyboard */,
+				96E2A0AE23B3F992004EC14A /* MyParticle.sks */,
 			);
 			path = NoMoreBubbles;
 			sourceTree = "<group>";
@@ -208,6 +211,7 @@
 				967387AF22DFC094001940D2 /* Main.storyboard in Resources */,
 				967387A622DFC094001940D2 /* GameScene.sks in Resources */,
 				967387B122DFC096001940D2 /* Assets.xcassets in Resources */,
+				96E2A0AF23B3F992004EC14A /* MyParticle.sks in Resources */,
 				967387B422DFC096001940D2 /* LaunchScreen.storyboard in Resources */,
 				967387A822DFC094001940D2 /* Actions.sks in Resources */,
 			);

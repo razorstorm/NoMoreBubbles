@@ -77,8 +77,6 @@ class GameScene: SKScene {
     private let bgColor: SKColor = SKColor.init(red: 0.20, green: 0.15, blue: 0.20, alpha: 1.0)
     private let scoreColor: SKColor = SKColor.init(red: 0.25, green: 0.15, blue: 0.25, alpha: 1.0)
     
-    private var particleEmitter: CAEmitterLayer?
-    
     override func didMove(to view: SKView) {
         let bottomBarHeight: CGFloat = 70
 
@@ -97,7 +95,7 @@ class GameScene: SKScene {
         
         let scoreBoardNode = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth + 2, height: scoreBoardHeight + 1))
         scoreBoardNode.position = CGPoint(x: 0, y: screenTop - scoreBoardHeight / 2.0 + 1)
-        scoreBoardNode.zPosition = 1
+        scoreBoardNode.zPosition = 30
         scoreBoardNode.lineWidth = 2
         scoreBoardNode.fillColor = scoreColor
         
@@ -111,13 +109,13 @@ class GameScene: SKScene {
         accumScoreLabel.fontSize = circleScoreFontSize
         accumScoreLabel.position = CGPoint(x: screenRight - 50, y: screenTop - 110)
         accumScoreLabel.fontColor = SKColor.white
-        accumScoreLabel.zPosition = 1
+        accumScoreLabel.zPosition = 31
         
         let currentScoreLabel = SKLabelNode.init(text: String(0))
         currentScoreLabel.fontSize = circleScoreFontSize
         currentScoreLabel.position = CGPoint(x: screenLeft + 50, y: screenTop - 110)
         currentScoreLabel.fontColor = SKColor.white
-        currentScoreLabel.zPosition = 1
+        currentScoreLabel.zPosition = 31
 
         addChild(scoreBoardNode)
         addChild(label)
@@ -146,24 +144,8 @@ class GameScene: SKScene {
         bottomBar.position = CGPoint(x: 0, y: gameBottom - bottomBarHeight / 2.0 - 1)
         bottomBar.fillColor = scoreColor
         bottomBar.lineWidth = 2
-        bottomBar.zPosition = 1
+        bottomBar.zPosition = 30
         addChild(bottomBar)
-        
-        // Particles
-        
-//        let test = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth, height: screenHeight - (bottomBarHeight + scoreBoardHeight)))
-//        test.position = CGPoint(x: 0, y: -(scoreBoardHeight / 2) + (bottomBarHeight) / 2)
-//        test.fillColor = UIColor.blue.withAlphaComponent(0.4)
-//        test.isAntialiased = true
-//        test.zPosition = 4
-//        addChild(test)
-
-        particleEmitter = CAEmitterLayer()
-        particleEmitter!.emitterPosition = CGPoint(x: 0, y: -(scoreBoardHeight / 2) + (bottomBarHeight) / 2)
-//        particleEmitter.emitterShape = .line
-        particleEmitter!.emitterSize = CGSize(width: screenWidth + 2, height: bottomBarHeight + 1)
-
-        view.layer.addSublayer(particleEmitter!)
         
         startGame()
     }
@@ -496,6 +478,8 @@ class GameScene: SKScene {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
         
+        generateParticles(position: ball!.node.position)
+        
         return ballPosition
     }
     
@@ -515,6 +499,32 @@ class GameScene: SKScene {
                     }
                 }
             }
+        }
+    }
+    
+    func generateParticles(position: CGPoint) {
+        if let emitter = SKEmitterNode(fileNamed: "TrailParticle.sks") {
+            emitter.position = ball!.node.position // center of screen
+            emitter.name = "boom"
+            emitter.targetNode = self
+            emitter.zPosition = 10
+            emitter.particleZPosition = 10
+            emitter.emissionAngleRange = 2 * CGFloat.pi
+            emitter.particleSpeedRange = 100
+            emitter.particleScaleRange = 0.3
+            emitter.particleScaleSpeed = -0.2
+            emitter.numParticlesToEmit = Int.random(in: 10...20)
+            emitter.particleColor = UIColor.white
+            addChild(emitter)
+            
+            let duration = 1.5
+            emitter.run(SKAction.sequence([
+                SKAction.wait(forDuration: 0.0),
+                SKAction.group([
+                    SKAction.scale(by: 0, duration: duration),
+                ]),
+                SKAction.removeFromParent()
+            ]))
         }
     }
 
@@ -558,25 +568,7 @@ class GameScene: SKScene {
                     ballCollided = true
                 }
                 if ballCollided {
-                    if let emitter = SKEmitterNode(fileNamed: "TrailParticle.sks") {
-                        emitter.position = ball!.node.position // center of screen
-                        emitter.name = "boom"
-                        emitter.targetNode = self
-                        emitter.zPosition = 10
-                        emitter.particleZPosition = 10
-//                        emitter.emissionAngle = 
-                        addChild(emitter)
-                        
-                        let duration = 3.0
-                        emitter.run(SKAction.sequence([
-                            SKAction.wait(forDuration: 0.0),
-                            SKAction.group([
-//                                SKAction.fadeOut(withDuration: duration)
-                                SKAction.scale(by: 0, duration: duration),
-                            ]),
-                            SKAction.removeFromParent()
-                        ]))
-                    }
+                    generateParticles(position: ball!.node.position)
                 }
 
                 // collision with other circles
