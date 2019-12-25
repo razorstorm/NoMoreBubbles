@@ -6,7 +6,7 @@
 //  Copyright © 2019 Jason Jiang. All rights reserved.
 //
 
-// TODO: powerups, add particles, dont spawn circles too close to goal, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
+// TODO: powerups, add particles, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
 
 import SpriteKit
 import GameplayKit
@@ -53,6 +53,8 @@ class GameScene: SKScene {
     private let scoreColor: SKColor = SKColor.init(red: 0.20, green: 0.15, blue: 0.20, alpha: 1.0)
     
     override func didMove(to view: SKView) {
+        let bottomBarHeight: CGFloat = 70
+
         screenWidth = size.width
         screenHeight = size.height
         
@@ -61,7 +63,7 @@ class GameScene: SKScene {
         screenTop = screenHeight/2
         gameTop = screenTop - scoreBoardHeight - 1
         screenBottom = -screenHeight/2
-        gameBottom = screenBottom + scoreBoardHeight
+        gameBottom = screenBottom + bottomBarHeight
         
         origin = CGPoint(x: 0 , y: gameBottom)
         lineOrigin = CGPoint(x: 0 , y: gameBottom)
@@ -90,9 +92,9 @@ class GameScene: SKScene {
         goal!.isAntialiased = true
         goal!.lineWidth = 2
         addChild(goal!)
-        
-        let bottomBar = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth + 2, height: scoreBoardHeight + 1))
-        bottomBar.position = CGPoint(x: 0, y: gameBottom - scoreBoardHeight / 2.0 - 1)
+
+        let bottomBar = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth + 2, height: bottomBarHeight + 1))
+        bottomBar.position = CGPoint(x: 0, y: gameBottom - bottomBarHeight / 2.0 - 1)
         bottomBar.fillColor = scoreColor
         bottomBar.lineWidth = 2
         bottomBar.zPosition = 1
@@ -503,7 +505,7 @@ class GameScene: SKScene {
                     ballCollided = true
                 }
                 if ballCollided {
-                    let generator = UIImpactFeedbackGenerator(style: .rigid)
+                    let generator = UIImpactFeedbackGenerator(style: .medium)
                     generator.impactOccurred()
                 }
 
