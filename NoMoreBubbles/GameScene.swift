@@ -6,6 +6,8 @@
 //  Copyright © 2019 Jason Jiang. All rights reserved.
 //
 
+// TODO: refresh scoreboard, add particles, dont spawn circles too close to goal, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
+
 import SpriteKit
 import GameplayKit
 
@@ -31,6 +33,8 @@ class GameScene: SKScene {
     private var screenTop: CGFloat = 0
     private var screenBottom: CGFloat = 0
     private var gameTop: CGFloat = 0
+    private let circleMinSize: CGFloat = 15
+    private let circleMaxSize: CGFloat = 70
     
     private var scoreBoard: ScoreBoard?
     private let scoreBoardHeight: CGFloat = 130
@@ -89,11 +93,11 @@ class GameScene: SKScene {
     
     func startGame() {
         let bottomMargin = CGFloat(50)
-        let circleMinSize = CGFloat(15)
-        let circleMaxSize = CGFloat(70)
         let maxRounds = 10000
 
         scoreBoard?.score = 0
+        scoreBoard!.labelNode.text = String(scoreBoard!.score)
+
         for circle in circles {
             circle.node.removeAllChildren()
             circle.node.removeFromParent()
@@ -104,7 +108,7 @@ class GameScene: SKScene {
         
         let gameBottom = screenBottom + bottomMargin
         
-        ballLoop: for i in 1...Int.random(in: 3...6) {
+        ballLoop: for _ in 1...Int.random(in: 3...6) {
             var position: CGPoint
             var invalidPosition: Bool = false
             var rounds: Int = 0
@@ -115,8 +119,6 @@ class GameScene: SKScene {
                 }
                 
                 position = generateRandomSeedCircleLocation(
-                    circleMinSize: circleMinSize,
-                    circleMaxSize: circleMaxSize,
                     gameBottom: gameBottom
                 )
 
@@ -143,11 +145,11 @@ class GameScene: SKScene {
                 rounds+=1
             } while (invalidPosition)
 
-            createCircle(atPoint: position, withHealth: i)
+            createCircle(atPoint: position)
         }
     }
     
-    func generateRandomSeedCircleLocation(circleMinSize: CGFloat, circleMaxSize: CGFloat, gameBottom: CGFloat) -> CGPoint {
+    func generateRandomSeedCircleLocation(gameBottom: CGFloat) -> CGPoint {
         let gracefulMargin = CGFloat(300)
         var xPosition: CGFloat
         var yPosition: CGFloat
@@ -348,7 +350,7 @@ class GameScene: SKScene {
     func onBallStop() {
         ball!.node.removeFromParent()
     
-        if CGDistance(from: ball!.node.position, to: lineOrigin!) > goalRadius {
+        if CGDistance(from: ball!.node.position, to: lineOrigin!) > goalRadius + circleMinSize {
             createCircle(atPoint: ball!.node.position)
         }
         ball = nil
