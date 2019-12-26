@@ -10,6 +10,14 @@
 // Add a gamescene node thats only the playable area, attach all balls and circles to this scene. Change everything to relative
 // Clear all children of gamescene on new game
 
+// Game Modes:
+// Sandbox: no death
+// Sandbox + powerup per launch
+// DeathGoal: goal kills, try to get highscore before dying
+// SetLaunches: You have 100 launches, try to get a high score
+// MaxRoundScore: You have 100 launches, try to get the maximum round score
+// Competitive: DeathGoal + No random powerups
+
 // Earned power ups, depending on how many circles destroyed previous round:
 // 2: resetSpeed / skullBall / doubleDamage
 // 3: large / small / shock
@@ -18,6 +26,7 @@
 // 6: destroy X circles
 // 7: clearWholeMap
 // 8: spawnAMillionThes
+// ScreenClear: 100 points
 
 // Tiny chance of getting one of these per each launch:
 // Stops ball in place and creates a circle
