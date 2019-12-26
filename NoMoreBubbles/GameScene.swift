@@ -157,7 +157,8 @@ class GameScene: SKScene {
             fromAccumScore: 0,
             fromAccumScoreLabel: accumScoreLabel,
             fromCurrentScore: 0,
-            fromCurrentScoreLabel: currentScoreLabel
+            fromCurrentScoreLabel: currentScoreLabel,
+            fromPastScore: 0
         )
         
         goal = SKShapeNode(circleOfRadius: goalRadius)
@@ -423,10 +424,6 @@ class GameScene: SKScene {
                 ball = Ball(fromNode: node, withVelocity: velocity, withSpeed: ballInitialSpeed, withRadius: ballInitialRadius)
                 
                 addChild(node)
-                
-                scoreBoard?.updateAccumScore(newScore: scoreBoard!.accumScore + adjustScorePerRound(score: scoreBoard!.currentScore))
-                scoreBoard?.updateCurrentScore(newScore: 0)
-                ballsDestroyedThisRound = 0
             }
         } else {
             startGame()
@@ -458,12 +455,10 @@ class GameScene: SKScene {
         ball = nil
         
         scoreBoard?.updateLevel(newLevel: scoreBoard!.level + 1)
+        scoreBoard?.accumulate()
+        ballsDestroyedThisRound = 0
         
         PowerUp.spawnPowerUp(ballsHit: ballsDestroyedThisRound, gameScene: self)
-    }
-    
-    func adjustScorePerRound(score: Int) -> Int {
-        return Int(pow(Double(score), 2.0))
     }
     
     func createExplosion(radius: CGFloat, strokeColor: UIColor, lineWidth: CGFloat, position: CGPoint) {
