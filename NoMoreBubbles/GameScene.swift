@@ -93,6 +93,7 @@ class GameScene: SKScene {
     
     private var lastParticleAt: CGPoint?
     private var particleDistance: CGFloat = 30
+    private let maxTrailsLimit: Int = 1000
     
     private var scoreBoard: ScoreBoard?
     private let scoreBoardHeight: CGFloat = 130
@@ -716,8 +717,31 @@ class GameScene: SKScene {
             ball!.velocity.dy = -abs(ball!.velocity.dy)
             ballCollided = true
         }
+
+        if ballPosition.x < screenLeft {
+            ball!.node.position.x = screenLeft + ball!.radius
+        }
+
+        if ballPosition.y < gameBottom {
+            ball!.node.position.y = gameBottom + ball!.radius
+        }
+
+        if ballPosition.x > screenRight {
+            ball!.node.position.x = screenRight - ball!.radius
+        }
+
+        if ballPosition.x > gameTop {
+            ball!.node.position.y = gameTop - ball!.radius
+        }
+
         if ballCollided {
             generateParticles(position: ball!.node.position)
+        }
+    }
+
+    func cleanUp() {
+        if trailContainerNode!.children.count > maxTrailsLimit {
+            trailContainerNode?.removeAllChildren()
         }
     }
 
@@ -725,6 +749,7 @@ class GameScene: SKScene {
         let frameInterval: CGFloat = CGFloat(currentTime - previousTime)
         let frameScalingFactor: CGFloat = frameInterval / physicsFrameRate
 
+        print(ball?.node.position)
         previousTime = currentTime
         
         if (ball != nil) {
@@ -736,7 +761,9 @@ class GameScene: SKScene {
                     x: ball!.node.position.x + ball!.velocity.dx * frameScalingFactor,
                     y: ball!.node.position.y + ball!.velocity.dy * frameScalingFactor
                 )
-                ball!.speed += max(scaledAcceleration(speed: ball!.speed), maxSpeedLimit) // ballAcceleration
+
+//                ball!.speed += min(scaledAcceleration(speed: ball!.speed), maxSpeedLimit) // ballAcceleration
+                ball!.speed += scaledAcceleration(speed: ball!.speed) // ballAcceleration
                 ball!.velocity = ball!.speed * normalizeVector(vector: ball!.velocity)
 
                 let originalBallPosition = ballPosition
@@ -789,6 +816,8 @@ class GameScene: SKScene {
                 ball!.node.position = ballPosition
             }
         }
+
+        cleanUp()
 
         updateExplosions()
     }
