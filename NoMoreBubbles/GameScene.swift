@@ -85,7 +85,9 @@ class GameScene: SKScene {
     private var powerUps: [PowerUp] = []
     private var ballsDestroyedThisRound: Int = 0
     private var currentPowerUpType: PowerUpType? = nil
-    
+
+    private var trailContainerNode: SKShapeNode? = nil
+
     override func didMove(to view: SKView) {
         let bottomBarHeight: CGFloat = 70
 
@@ -155,6 +157,12 @@ class GameScene: SKScene {
         bottomBar.lineWidth = 2
         bottomBar.zPosition = 30
         addChild(bottomBar)
+
+        trailContainerNode = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth, height: screenHeight))
+        trailContainerNode?.position = CGPoint(x: 0, y: 0)
+        trailContainerNode?.fillColor = SKColor.clear
+        trailContainerNode?.strokeColor = SKColor.clear
+        addChild(trailContainerNode!)
         
         startGame()
     }
@@ -548,11 +556,12 @@ class GameScene: SKScene {
         
         node.fillColor = SKColor.white
         node.isAntialiased = true
-        node.position = CGPoint(x: lineOrigin!.x, y: lineOrigin!.y)
+        node.position = ball!.node.position
 
         ball!.node.removeFromParent()
         ball!.node = node
         addChild(node)
+        trailContainerNode?.removeAllChildren()
     }
     
     func activatePowerUp(powerUp: PowerUp, index: Int) {
@@ -774,7 +783,7 @@ class GameScene: SKScene {
                     trailPosition.x += scaledTravelVector.dx
                     trailPosition.y += scaledTravelVector.dy
 
-                    addChild(trailNode)
+                    trailContainerNode?.addChild(trailNode)
 
                     let duration = 0.2
                     trailNode.run(SKAction.sequence([
