@@ -30,6 +30,8 @@ enum PowerUpType: UInt32, CaseIterable {
     case superBounce
     case shock
     case resetSpeed
+    case largeBall
+    case smallBall
 }
 
 func randomPowerUpType() -> PowerUpType {
