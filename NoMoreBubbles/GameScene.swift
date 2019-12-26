@@ -82,7 +82,7 @@ class GameScene: SKScene {
     private let bgColor: SKColor = SKColor.init(red: 0.20, green: 0.15, blue: 0.20, alpha: 1.0)
     private let scoreColor: SKColor = SKColor.init(red: 0.25, green: 0.15, blue: 0.25, alpha: 1.0)
     
-    private var powerUps: [PowerUp] = []
+    var powerUps: [PowerUp] = []
     private var ballsDestroyedThisRound: Int = 0
     private var currentPowerUpType: PowerUpType? = nil
 
@@ -363,7 +363,9 @@ class GameScene: SKScene {
 //        label.fontName = "AppleSDGothicNeo-Bold"
 //        label.fontName = "Chalkduster"
 //        label.fontName = "ChalkboardSE-Bold"
-        label.position = CGPoint(x: 0, y: -label.frame.height/2)
+        label.position = CGPoint(x: 0, y: 0)
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
 
         addChild(node)
         node.addChild(label)
@@ -440,7 +442,7 @@ class GameScene: SKScene {
         
         scoreBoard?.updateLevel(newLevel: scoreBoard!.level + 1)
         
-        spawnPowerUp()
+        PowerUp.spawnPowerUp(ballsHit: ballsDestroyedThisRound, gameScene: self)
     }
     
     func adjustScorePerRound(score: Int) -> Int {
@@ -571,6 +573,7 @@ class GameScene: SKScene {
                 break
             case .superBounce:
                 ball!.node.fillColor = powerUpColorForType(type: powerUp.type)
+                ball!.node.strokeColor = powerUpColorForType(type: powerUp.type)
                 break
             case .shock:
                 createExplosion(radius: 50, strokeColor: SKColor.red, lineWidth: 3, position: powerUp.node.position)
@@ -595,48 +598,6 @@ class GameScene: SKScene {
             if CGDistance(from: ballPosition, to: powerUp.node.position) <= CGFloat(powerUp.radius) + ball!.radius {
                 activatePowerUp(powerUp: powerUp, index: i)
             }
-        }
-    }
-    
-    func powerUpColorForType(type: PowerUpType) -> SKColor {
-        switch type {
-            case .resetSpeed: return SKColor.blue
-            case .shock: return SKColor.red
-            case .superBounce: return SKColor.green
-            case .largeBall: return SKColor.yellow
-            case .smallBall: return SKColor.yellow
-        }
-    }
-    
-    func spawnPowerUp(ballsHit: Int = 0) {
-        let radius = 15
-        var powerUpType: PowerUpType? = nil
-        
-        switch ballsDestroyedThisRound {
-            case 2:
-                powerUpType = PowerUpType.shock
-            case 3:
-                powerUpType = PowerUpType.resetSpeed
-            default:
-                let random = CGFloat.random(in: 0...100)
-                if random < 10 {
-                    powerUpType = randomPowerUpType()
-                }
-        }
-        
-        // Delete
-        powerUpType = PowerUpType.smallBall
-
-        if powerUpType != nil {
-            let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
-            powerUpNode.position = generateRandomValidPowerUpLocation()
-            powerUpNode.strokeColor = powerUpColorForType(type: powerUpType!)
-            powerUpNode.isAntialiased = true
-            powerUpNode.lineWidth = 4
-            addChild(powerUpNode)
-
-            let powerUp = PowerUp(withNode: powerUpNode, type: powerUpType!, radius: radius)
-            powerUps.append(powerUp)
         }
     }
     
