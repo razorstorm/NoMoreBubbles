@@ -78,6 +78,7 @@ class GameScene: SKScene {
     private var line: SKShapeNode?
     private let ballInitialRadius: CGFloat = 15
     private let ballInitialSpeed: CGFloat = 35
+    private let maxSpeedLimit: CGFloat = 50
     private let ballAcceleration: CGFloat = -1.4
     private var screenWidth: CGFloat = 0
     private var screenHeight: CGFloat = 0
@@ -735,7 +736,7 @@ class GameScene: SKScene {
                     x: ball!.node.position.x + ball!.velocity.dx * frameScalingFactor,
                     y: ball!.node.position.y + ball!.velocity.dy * frameScalingFactor
                 )
-                ball!.speed += scaledAcceleration(speed: ball!.speed) // ballAcceleration
+                ball!.speed += max(scaledAcceleration(speed: ball!.speed), maxSpeedLimit) // ballAcceleration
                 ball!.velocity = ball!.speed * normalizeVector(vector: ball!.velocity)
 
                 let originalBallPosition = ballPosition
