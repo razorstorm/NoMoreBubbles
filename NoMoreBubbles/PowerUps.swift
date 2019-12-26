@@ -30,4 +30,5 @@ enum PowerUpType {
     case superBounce
     case shock
     case resetSpeed
+    case bofadees
 }
