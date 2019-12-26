@@ -13,9 +13,9 @@ import GameplayKit
 class PowerUp: Equatable {
     let node: SKShapeNode
     let type: PowerUpType
-    let radius: Int
+    let radius: CGFloat
 
-    public init(withNode node: SKShapeNode, type: PowerUpType, radius: Int) {
+    public init(withNode node: SKShapeNode, type: PowerUpType, radius: CGFloat) {
         self.type = type
         self.node = node
         self.radius = radius
@@ -26,7 +26,7 @@ class PowerUp: Equatable {
     }
 
     static func spawnPowerUp(ballsHit: Int = 0, gameScene: GameScene) {
-        let radius = 15
+        let radius: CGFloat = 15
         var powerUpType: PowerUpType? = nil
 
         switch ballsHit {
@@ -46,24 +46,20 @@ class PowerUp: Equatable {
 
         if powerUpType != nil {
             let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
-            powerUpNode.position = gameScene.generateRandomValidPowerUpLocation()
+            powerUpNode.position = gameScene.generateRandomValidPowerUpLocation(radius: radius)
             powerUpNode.strokeColor = powerUpColorForType(type: powerUpType!)
             powerUpNode.isAntialiased = true
             powerUpNode.lineWidth = 4
             gameScene.addChild(powerUpNode)
 
             let label = SKLabelNode.init(text: powerUpStringForType(type: powerUpType!))
-            label.fontSize = 20
+            label.fontSize = 22
             label.position = CGPoint(x: 0.0, y: 0)
             label.fontColor = powerUpNode.strokeColor
             label.horizontalAlignmentMode = .center
             label.verticalAlignmentMode = .center
+            label.fontName = "HelveticaNeue-Bold"
 
-            let frameNode = SKShapeNode.init(rectOf: label.frame.size)
-            frameNode.position = label.position
-            frameNode.strokeColor = SKColor.white
-
-            powerUpNode.addChild(frameNode)
             powerUpNode.addChild(label)
 
             let powerUp = PowerUp(withNode: powerUpNode, type: powerUpType!, radius: radius)
@@ -96,10 +92,10 @@ func powerUpColorForType(type: PowerUpType) -> SKColor {
 
 func powerUpStringForType(type: PowerUpType) -> String {
     switch type {
-        case .resetSpeed: return "R"
+        case .resetSpeed: return ">"
         case .shock: return "💥"
-        case .superBounce: return "asdf"
+        case .superBounce: return "B"
         case .largeBall: return "+"
-        case .smallBall: return "-"
+        case .smallBall: return "—"
     }
 }

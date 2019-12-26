@@ -7,30 +7,47 @@
 //
 
 // TODO: powerups, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
+// Add a gamescene node thats only the playable area, attach all balls and circles to this scene. Change everything to relative
+// Clear all children of gamescene on new game
+
+// Earned power ups, depending on how many circles destroyed previous round:
+// 2: resetSpeed / skullBall / doubleDamage
+// 3: large / small / shock
+// 4: shockwaveOnBounce / randomDamageCircles / damageAura
+// 5: superBounce / ultra speed / allCircles1hp
+// 6: destroy X circles
+// 7: clearWholeMap
+// 8: spawnAMillionThes
+
+// Tiny chance of getting one of these per each launch:
+// Stops ball in place and creates a circle
+// Ball stops in place and creates medium sized shockwave and a new circle
+// Will not generate a new circle on stop. ball light gray or something
+// Damage aura larger than ball
+// Increases a circle's health by 1 instead of decrease on hit by ball
+// Medium sized shockwave on ball stop.
+// Shockwaves will deal 2 damage
+// Shockwaves deal 0 damage
+// Changes all circle's health to 5
+// Deals no damage, but large shockwave on bounce
+// 10 frames per second until next launch LOLL
+// Teleports ball to a random location and resets speed
+// Teleports on bounce
 
 // Power up ideas:
 // SuperBounce On bounce from circles, speeds up. make circles glowing or something
 // Shock Large shockwave from position
-
 // A few random circles lose a random amount of health
 // Fast ball with no deceleration for certain amount of time
 // Large ball
 // Small ball
-// Stops ball in place
-// Will not generate a new circle on stop. ball light gray or something
 // Damage aura larger than ball
-// Increases a circle's health by 1 instead of decrease on hit by ball
 // Ball will deal 2 damage instead of 1 to circle, speed is also reset back to launch speed. Ball glowing red
-// Instant kill the next circle hit. Ball turns into a skull
-// Medium sized shockwave on ball stop.
+// SkullBall: Instant kill the next circle hit. Ball turns into a skull
 // Small shockwave on each ball bounce
-// Shockwaves will deal 2 damage
-// Shockwaves deal 0 damage
 // Instantly destroy X circles
 // Clears entire screen
-// Ball stops in place and creates medium sized shockwave and a new circle
-// Changes all circle's health to 1
-// Changes all circle's health to 5
+
 // Creates a circle in place
 // better distribute powerups based on rarity
 
@@ -601,7 +618,7 @@ class GameScene: SKScene {
         }
     }
     
-    func generateRandomValidPowerUpLocation() -> CGPoint {
+    func generateRandomValidPowerUpLocation(radius: CGFloat) -> CGPoint {
         var rounds = 0
         let maxRounds = 10000
         var invalidPosition = false
@@ -623,6 +640,12 @@ class GameScene: SKScene {
             // If the position is too close to the goal post we can't spawn circle there
             if CGDistance(from: origin!, to: position) < goalRadius + margin {
                 invalidPosition = true
+            }
+
+            for powerUp in powerUps {
+                if CGDistance(from: position, to: powerUp.node.position) <= 2 * radius {
+                    invalidPosition = true
+                }
             }
             
             for circle in circles {
