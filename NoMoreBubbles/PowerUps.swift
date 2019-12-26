@@ -50,7 +50,7 @@ class PowerUp: Equatable {
             powerUpNode.strokeColor = powerUpColorForType(type: powerUpType!)
             powerUpNode.isAntialiased = true
             powerUpNode.lineWidth = 4
-            gameScene.addChild(powerUpNode)
+            gameScene.playingScreen?.addChild(powerUpNode)
 
             let label = SKLabelNode.init(text: powerUpStringForType(type: powerUpType!))
             label.fontSize = 22

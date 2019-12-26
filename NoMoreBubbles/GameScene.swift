@@ -86,8 +86,12 @@ class GameScene: SKScene {
     private var screenRight: CGFloat = 0
     private var screenTop: CGFloat = 0
     private var screenBottom: CGFloat = 0
+    private var gameHeight: CGFloat = 0
     private var gameTop: CGFloat = 0
     private var gameBottom: CGFloat = 0
+    var gameScreen: SKShapeNode?
+    var playingScreen: SKShapeNode?
+
     private let circleMinSize: CGFloat = 15
     private let circleMaxSize: CGFloat = 70
     
@@ -121,13 +125,15 @@ class GameScene: SKScene {
 
         screenWidth = size.width
         screenHeight = size.height
-        
+        gameHeight = screenHeight - (bottomBarHeight + scoreBoardHeight)
         screenLeft = -screenWidth/2
         screenRight = screenWidth/2
         screenTop = screenHeight/2
-        gameTop = screenTop - scoreBoardHeight - 1
         screenBottom = -screenHeight/2
-        gameBottom = screenBottom + bottomBarHeight
+//        gameTop = screenTop - scoreBoardHeight - 1
+//        gameBottom = screenBottom + bottomBarHeight
+        gameTop = gameHeight/2
+        gameBottom = -gameHeight / 2.0
         
         origin = CGPoint(x: 0 , y: gameBottom)
         lineOrigin = CGPoint(x: 0 , y: gameBottom)
@@ -171,27 +177,41 @@ class GameScene: SKScene {
             fromCurrentScoreLabel: currentScoreLabel,
             fromPastScore: 0
         )
-        
+
+        let bottomBar = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth + 2, height: bottomBarHeight + 1))
+        bottomBar.position = CGPoint(x: 0, y: screenBottom + bottomBarHeight / 2.0 - 1)
+        bottomBar.fillColor = scoreColor
+        bottomBar.lineWidth = 2
+        bottomBar.zPosition = 40
+        addChild(bottomBar)
+
+        gameScreen = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth, height: gameHeight))
+        gameScreen?.position = CGPoint(x: 0, y: bottomBarHeight / 2.0 - scoreBoardHeight / 2.0 - 1)
+//        gameScreen?.fillColor = SKColor.blue.withAlphaComponent(0.1)
+        gameScreen?.strokeColor = SKColor.clear
+        addChild(gameScreen!)
+
+        playingScreen = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth, height: gameHeight))
+        playingScreen?.position = CGPoint(x: 0, y: 0)
+        playingScreen?.fillColor = SKColor.clear
+        playingScreen?.strokeColor = SKColor.clear
+        gameScreen?.addChild(playingScreen!)
+
+        trailContainerNode = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth, height: gameHeight))
+        trailContainerNode?.position = CGPoint(x: 0, y: 0)
+        trailContainerNode?.fillColor = SKColor.clear
+        trailContainerNode?.strokeColor = SKColor.clear
+        gameScreen?.addChild(trailContainerNode!)
+
         goal = SKShapeNode(circleOfRadius: goalRadius)
-        goal!.position = origin!
+        goal!.position = lineOrigin!
+//        goal!.position = CGPoint(x: 0, y: 0)
         goal!.strokeColor = SKColor.green
         goal!.fillColor = UIColor.green.withAlphaComponent(0.1)
         goal!.isAntialiased = true
         goal!.lineWidth = 2
-        addChild(goal!)
-
-        let bottomBar = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth + 2, height: bottomBarHeight + 1))
-        bottomBar.position = CGPoint(x: 0, y: gameBottom - bottomBarHeight / 2.0 - 1)
-        bottomBar.fillColor = scoreColor
-        bottomBar.lineWidth = 2
-        bottomBar.zPosition = 30
-        addChild(bottomBar)
-
-        trailContainerNode = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth, height: screenHeight))
-        trailContainerNode?.position = CGPoint(x: 0, y: 0)
-        trailContainerNode?.fillColor = SKColor.clear
-        trailContainerNode?.strokeColor = SKColor.clear
-        addChild(trailContainerNode!)
+        //        goal!.zPosition = 10000
+        gameScreen?.addChild(goal!)
         
         startGame()
     }
@@ -209,6 +229,7 @@ class GameScene: SKScene {
         circles = []
         ball?.node.removeFromParent()
         ball = nil
+        playingScreen?.removeAllChildren()
         
         for powerUp in powerUps {
             powerUp.node.removeFromParent()
@@ -366,7 +387,7 @@ class GameScene: SKScene {
             line = SKShapeNode()
             line!.strokeColor = SKColor.white
             line!.lineWidth = 3
-            addChild(line!)
+            playingScreen?.addChild(line!)
         }
         line!.path = path
     }
@@ -396,7 +417,7 @@ class GameScene: SKScene {
         label.horizontalAlignmentMode = .center
         label.verticalAlignmentMode = .center
 
-        addChild(node)
+        playingScreen?.addChild(node)
         node.addChild(label)
 
         let circle = Circle.init(fromRadius: size, fromNode: node, fromHealth: health, fromLabel: label)
@@ -430,11 +451,11 @@ class GameScene: SKScene {
                 
                 node.fillColor = SKColor.white
                 node.isAntialiased = true
-                node.position = CGPoint(x: lineOrigin!.x, y: lineOrigin!.y)
+                node.position = lineOrigin!
                 
                 ball = Ball(fromNode: node, withVelocity: velocity, withSpeed: ballInitialSpeed, withRadius: ballInitialRadius)
                 
-                addChild(node)
+                playingScreen?.addChild(node)
             }
         } else {
             startGame()
@@ -585,7 +606,7 @@ class GameScene: SKScene {
 
         ball!.node.removeFromParent()
         ball!.node = node
-        addChild(node)
+        playingScreen?.addChild(node)
         trailContainerNode?.removeAllChildren()
     }
     
@@ -749,7 +770,6 @@ class GameScene: SKScene {
         let frameInterval: CGFloat = CGFloat(currentTime - previousTime)
         let frameScalingFactor: CGFloat = frameInterval / physicsFrameRate
 
-        print(ball?.node.position)
         previousTime = currentTime
         
         if (ball != nil) {
