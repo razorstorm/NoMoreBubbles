@@ -6,7 +6,7 @@
 //  Copyright © 2019 Jason Jiang. All rights reserved.
 //
 
-// TODO: powerups, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
+// TODO: powerups, spawn circles further from wall if ball ends too close. projéct line out, reflections on line from balls
 
 // Game Modes:
 // Sandbox: no death
@@ -370,21 +370,59 @@ class GameScene: SKScene {
 
     func pathForLine(atPoint pos: CGPoint) -> CGMutablePath {
         let pathToDraw = CGMutablePath()
+        var expandedX = (pos.x - lineOrigin!.x)
+        let expandedY = (pos.y - lineOrigin!.y)
+
+        if expandedX == 0 {
+            expandedX = 0.00001
+        }
+
+        let slope = expandedY / expandedX
+        var position: CGPoint
+
+        let topXIntercept = (gameTop - gameBottom) / slope
+        let topDist = CGDistance(from: lineOrigin!, to: CGPoint(x: topXIntercept, y: gameTop))
+        if slope > 0 {
+            let rightYIntercept = screenRight * slope + gameBottom
+            let topDist = CGDistance(from: lineOrigin!, to: CGPoint(x: topXIntercept, y: gameTop))
+            let rightDist = CGDistance(from: lineOrigin!, to: CGPoint(x: screenRight, y: rightYIntercept))
+
+            if topDist < rightDist {
+                position = CGPoint(x: topXIntercept, y: gameTop)
+            } else {
+                position = CGPoint(x: screenRight, y: rightYIntercept)
+            }
+            print("top", topXIntercept, "right", rightYIntercept, "pos", position.x, position.y)
+        } else {
+            let leftYIntercept = screenLeft * slope + gameBottom
+            let leftDist = CGDistance(from: lineOrigin!, to: CGPoint(x: screenLeft, y: leftYIntercept))
+
+            if topDist < leftDist {
+                position = CGPoint(x: topXIntercept, y: gameTop)
+            } else {
+                position = CGPoint(x: screenLeft, y: leftYIntercept)
+            }
+        }
+
         pathToDraw.move(to: CGPoint(x: lineOrigin!.x, y: lineOrigin!.y))
-        pathToDraw.addLine(to: CGPoint(x: pos.x, y: pos.y))
+//        pathToDraw.addLine(to: CGPoint(x: pos.x, y: pos.y))
+//        pathToDraw.addLine(to: CGPoint(x: expandedX, y: expandedY))
+        pathToDraw.addLine(to: position)
         return pathToDraw
     }
 
     func drawLine(atPoint pos: CGPoint) {
         let pattern : [CGFloat] = [2.0, 5.0]
-        let path = pathForLine(atPoint: pos).copy(dashingWithPhase: 2, lengths: pattern)
+        let clampedYPos = max(pos.y, gameBottom)
+        let path = pathForLine(atPoint: CGPoint(x: pos.x, y: clampedYPos)).copy(dashingWithPhase: 2, lengths: pattern)
         if (line == nil) {
             line = SKShapeNode()
             line!.strokeColor = SKColor.white
-            line!.lineWidth = 3
+            line!.lineWidth = 2
             playingScreen?.addChild(line!)
         }
         line!.path = path
+//        hitTestWithSegmentFromPoint()
     }
 
     func createCircle(atPoint pos: CGPoint, withHealth expectedHealth: Int? = nil) {
