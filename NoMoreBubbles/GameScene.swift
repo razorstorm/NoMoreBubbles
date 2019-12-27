@@ -71,12 +71,12 @@ class GameScene: SKScene {
     private let circleScoreFontSize: CGFloat = 40
     private let colors: [SKColor] = [SKColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0), SKColor.cyan, SKColor(red: 0.2, green: 0.9, blue: 0.2, alpha: 1.0), SKColor.yellow, SKColor(red: 0.45, green: 0.45, blue: 1.0, alpha: 1.0), SKColor.lightGray, SKColor.orange]
     private let maxCircleSize: CGFloat = 170.0
-    private var ball: Ball?
+    var ball: Ball?
     private var origin: CGPoint?
     private var lineOrigin: CGPoint?
     private var line: SKShapeNode?
     private let ballInitialRadius: CGFloat = 15
-    private let ballInitialSpeed: CGFloat = 35
+    let ballInitialSpeed: CGFloat = 35
     private let maxSpeedLimit: CGFloat = 50
     private let ballAcceleration: CGFloat = -1.4
     private var screenWidth: CGFloat = 0
@@ -115,7 +115,7 @@ class GameScene: SKScene {
     
     var powerUps: [PowerUp] = []
     private var ballsDestroyedThisRound: Int = 0
-    private var currentPowerUpType: PowerUpType? = nil
+    var currentPowerUp: PowerUp? = nil
 
     private var trailContainerNode: SKShapeNode? = nil
     private var inRound: Bool = false
@@ -580,12 +580,22 @@ class GameScene: SKScene {
         )
     }
 
+    func updateBallToPowerUp() {
+        ball!.labelNode.text = currentPowerUp?.ballLabel() ?? ""
+        ball!.node.fillColor = currentPowerUp?.ballFillColor() ?? SKColor.white
+        ball!.node.strokeColor = currentPowerUp?.ballStrokeColor() ?? SKColor.white
+    }
+
     func damageCircle(circle: Circle, withIndex i: Int) {
-        if currentPowerUpType == .doubleDamage {
-            circle.health -= 2
-        } else {
-            circle.health -= 1
+        switch currentPowerUp?.type {
+            case .doubleDamage: circle.health -= 2
+            case .skullBall:
+                circle.health = 0
+                currentPowerUp = nil
+                updateBallToPowerUp()
+            default: circle.health -= 1
         }
+
         circle.labelNode.text = circle.health > 0 ? String(circle.health) : ""
         circle.node.run(SKAction.sequence([
             SKAction.scale(by: 0.9, duration: 0.1),
@@ -625,8 +635,8 @@ class GameScene: SKScene {
         let resultant = normalizedVelocity - 2 * velocityComponentPerpendicularToTangent
 
         let normalizedResultant = normalizeVector(vector: resultant)
-        
-        if currentPowerUpType == PowerUpType.superBounce {
+
+        if currentPowerUp?.type == PowerUpType.superBounce {
             ball!.speed = ballInitialSpeed
         }
         
@@ -681,8 +691,6 @@ class GameScene: SKScene {
                 ball!.speed = ballInitialSpeed
                 break
             case .superBounce:
-                ball!.node.fillColor = powerUpColorForType(type: powerUp.type)
-                ball!.node.strokeColor = powerUpColorForType(type: powerUp.type)
                 ball!.speed = ballInitialSpeed
                 break
             case .shock:
@@ -697,12 +705,16 @@ class GameScene: SKScene {
                 ball!.speed = ballInitialSpeed
                 swapBallNode()
             case .doubleDamage:
-                ball!.node.fillColor = powerUpColorForType(type: powerUp.type)
-                ball!.node.strokeColor = powerUpColorForType(type: powerUp.type)
-                ball!.labelNode.text = "2x"
+                break
+            case .skullBall:
+                break
         }
-        
-        currentPowerUpType = powerUp.type
+        ball!.labelNode.text = powerUp.ballLabel()
+
+        ball!.node.fillColor = powerUp.ballFillColor()
+        ball!.node.strokeColor = powerUp.ballStrokeColor()
+    
+        currentPowerUp = powerUp
         powerUp.node.removeFromParent()
         powerUps.removeAll(where: { $0 == powerUp })
     }
@@ -710,7 +722,7 @@ class GameScene: SKScene {
     func checkPowerUpCollisions(ballPosition: CGPoint) {
         for (i, powerUp) in powerUps.enumerated() {
             if CGDistance(from: ballPosition, to: powerUp.node.position) <= CGFloat(powerUp.radius) + ball!.radius {
-                activatePowerUp(powerUp: powerUp, index: i)
+                powerUp.activate(gameScene: self, index: i)
             }
         }
     }

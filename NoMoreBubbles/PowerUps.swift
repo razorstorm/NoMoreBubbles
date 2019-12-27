@@ -20,6 +20,72 @@ class PowerUp: Equatable {
         self.node = node
         self.radius = radius
     }
+
+    public func activate(gameScene: GameScene, index: Int) {
+        switch self.type {
+            case .resetSpeed:
+                gameScene.ball!.speed = gameScene.ballInitialSpeed
+                break
+            case .superBounce:
+                gameScene.ball!.speed = gameScene.ballInitialSpeed
+                break
+            case .shock:
+                gameScene.createExplosion(radius: 50, strokeColor: SKColor.red, lineWidth: 3, position: self.node.position)
+                break
+            case .largeBall:
+                gameScene.ball!.radius = 30
+                gameScene.ball!.speed = gameScene.ballInitialSpeed
+                gameScene.swapBallNode()
+            case .smallBall:
+                gameScene.ball!.radius = 7.5
+                gameScene.ball!.speed = gameScene.ballInitialSpeed
+                gameScene.swapBallNode()
+            case .doubleDamage:
+                break
+            case .skullBall:
+                break
+        }
+
+        gameScene.currentPowerUp = self
+        self.node.removeFromParent()
+        gameScene.powerUps.removeAll(where: { $0 == self })
+
+        gameScene.updateBallToPowerUp()
+    }
+
+    public func ballLabel() -> String {
+        switch type {
+            case .doubleDamage: return "2x"
+            case .skullBall: return "☠"
+            default: return ""
+        }
+    }
+
+    public func ballStrokeColor() -> SKColor {
+        switch type {
+            case .resetSpeed, .shock, .superBounce, .largeBall, .smallBall, .doubleDamage, .skullBall:
+            return ballFillColor()
+        }
+    }
+
+    public func ballFillColor() -> SKColor {
+        switch type {
+            case .resetSpeed, .shock, .superBounce, .largeBall, .smallBall, .doubleDamage, .skullBall:
+                return PowerUp.powerUpColor(type: type)
+        }
+    }
+
+    static func powerUpColor(type: PowerUpType) -> SKColor {
+        switch type {
+            case .resetSpeed: return SKColor.blue
+            case .shock: return SKColor.red
+            case .superBounce: return SKColor.green
+            case .largeBall: return SKColor.yellow
+            case .smallBall: return SKColor.yellow
+            case .doubleDamage: return SKColor.red
+            case .skullBall: return SKColor.black
+        }
+    }
     
     static func == (lhs: PowerUp, rhs: PowerUp) -> Bool {
         return lhs === rhs
@@ -43,17 +109,18 @@ class PowerUp: Equatable {
 
         // Delete
         powerUpType = randomPowerUpType()
-        powerUpType = .doubleDamage
+        powerUpType = .skullBall
 
         if powerUpType != nil {
             let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
             powerUpNode.position = gameScene.generateRandomValidPowerUpLocation(radius: radius)
-            powerUpNode.strokeColor = powerUpColorForType(type: powerUpType!)
+            powerUpNode.strokeColor = PowerUp.powerUpColor(type: powerUpType!)
+            powerUpNode.fillColor = fillColorForType(type: powerUpType!)
             powerUpNode.isAntialiased = true
             powerUpNode.lineWidth = 4
             gameScene.playingScreen?.addChild(powerUpNode)
 
-            let label = SKLabelNode.init(text: powerUpStringForType(type: powerUpType!))
+            let label = SKLabelNode.init(text: powerUpLabelForType(type: powerUpType!))
             label.fontSize = 22
             label.position = CGPoint(x: 0.0, y: 0)
             label.fontColor = powerUpNode.strokeColor
@@ -76,24 +143,21 @@ enum PowerUpType: UInt32, CaseIterable {
     case largeBall
     case smallBall
     case doubleDamage
+    case skullBall
 }
 
 func randomPowerUpType() -> PowerUpType {
     return PowerUpType(rawValue: arc4random_uniform(UInt32(PowerUpType.allCases.count)))!
 }
 
-func powerUpColorForType(type: PowerUpType) -> SKColor {
+func fillColorForType(type: PowerUpType) -> SKColor {
     switch type {
-        case .resetSpeed: return SKColor.blue
-        case .shock: return SKColor.red
-        case .superBounce: return SKColor.green
-        case .largeBall: return SKColor.yellow
-        case .smallBall: return SKColor.yellow
-        case .doubleDamage: return SKColor.red
+        case .skullBall: return SKColor.black
+        default: return SKColor.clear
     }
 }
 
-func powerUpStringForType(type: PowerUpType) -> String {
+func powerUpLabelForType(type: PowerUpType) -> String {
     switch type {
         case .resetSpeed: return ">"
         case .shock: return "💥"
@@ -101,5 +165,6 @@ func powerUpStringForType(type: PowerUpType) -> String {
         case .largeBall: return "+"
         case .smallBall: return "—"
         case .doubleDamage: return "2x"
+        case .skullBall: return "☠"
     }
 }
