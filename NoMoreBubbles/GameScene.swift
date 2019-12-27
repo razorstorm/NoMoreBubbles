@@ -392,7 +392,7 @@ class GameScene: SKScene {
             } else {
                 position = CGPoint(x: screenRight, y: rightYIntercept)
             }
-            print("top", topXIntercept, "right", rightYIntercept, "pos", position.x, position.y)
+//            print("top", topXIntercept, "right", rightYIntercept, "pos", position.x, position.y)
         } else {
             let leftYIntercept = screenLeft * slope + gameBottom
             let leftDist = CGDistance(from: lineOrigin!, to: CGPoint(x: screenLeft, y: leftYIntercept))
@@ -412,6 +412,7 @@ class GameScene: SKScene {
     }
 
     func drawLine(atPoint pos: CGPoint) {
+        print("path", pos.x, pos.y)
         let pattern : [CGFloat] = [2.0, 5.0]
         let clampedYPos = max(pos.y, gameBottom)
         let path = pathForLine(atPoint: CGPoint(x: pos.x, y: clampedYPos)).copy(dashingWithPhase: 2, lengths: pattern)
@@ -467,6 +468,7 @@ class GameScene: SKScene {
     }
 
     func touchUp(atPoint pos : CGPoint) {
+        print("touchUp", pos.x, pos.y)
         if pos.y <= gameTop {
             if !inRound && ball == nil {
                 line?.removeFromParent()
@@ -490,15 +492,17 @@ class GameScene: SKScene {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { touchDown(atPoint: t.location(in: self)) }
+        for t in touches { touchDown(atPoint: t.location(in: gameScreen!)) }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { touchMoved(toPoint: t.location(in: self)) }
+        for t in touches { touchMoved(toPoint: t.location(in: gameScreen!)) }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { touchUp(atPoint: t.location(in: self)) }
+        for t in touches {
+            touchUp(atPoint: t.location(in: gameScreen!))
+        }
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
