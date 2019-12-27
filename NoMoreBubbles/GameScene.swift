@@ -7,8 +7,6 @@
 //
 
 // TODO: powerups, spawn circles further from wall if ball ends too close. project line out, reflections on line from balls
-// Add a gamescene node thats only the playable area, attach all balls and circles to this scene. Change everything to relative
-// Clear all children of gamescene on new game
 
 // Game Modes:
 // Sandbox: no death
