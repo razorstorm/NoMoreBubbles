@@ -6,7 +6,7 @@
 //  Copyright © 2019 Jason Jiang. All rights reserved.
 //
 
-// TODO: powerups, spawn circles further from wall if ball ends too close. projéct line out, reflections on line from balls
+// TODO: powerups, spawn circles further from wall if ball ends too close. reflections on line from balls
 
 // Game Modes:
 // Sandbox: no death
@@ -118,6 +118,7 @@ class GameScene: SKScene {
 
     private var trailContainerNode: SKShapeNode? = nil
     private var inRound: Bool = false
+    private var touchCircle: SKShapeNode? = nil
 
     override func didMove(to view: SKView) {
         let bottomBarHeight: CGFloat = 70
@@ -363,6 +364,14 @@ class GameScene: SKScene {
     }
 
     func touchDown(atPoint pos : CGPoint) {
+        if touchCircle != nil {
+            touchCircle?.removeFromParent()
+        }
+        touchCircle = SKShapeNode.init(circleOfRadius: 15)
+        touchCircle?.fillColor = SKColor.white.withAlphaComponent(0.2)
+        touchCircle?.strokeColor = SKColor.clear
+        touchCircle?.position = pos
+        gameScreen?.addChild(touchCircle!)
         if (ball == nil) {
             drawLine(atPoint: pos)
         }
@@ -392,7 +401,6 @@ class GameScene: SKScene {
             } else {
                 position = CGPoint(x: screenRight, y: rightYIntercept)
             }
-//            print("top", topXIntercept, "right", rightYIntercept, "pos", position.x, position.y)
         } else {
             let leftYIntercept = screenLeft * slope + gameBottom
             let leftDist = CGDistance(from: lineOrigin!, to: CGPoint(x: screenLeft, y: leftYIntercept))
@@ -412,7 +420,6 @@ class GameScene: SKScene {
     }
 
     func drawLine(atPoint pos: CGPoint) {
-        print("path", pos.x, pos.y)
         let pattern : [CGFloat] = [2.0, 5.0]
         let clampedYPos = max(pos.y, gameBottom)
         let path = pathForLine(atPoint: CGPoint(x: pos.x, y: clampedYPos)).copy(dashingWithPhase: 2, lengths: pattern)
@@ -457,6 +464,7 @@ class GameScene: SKScene {
     }
 
     func touchMoved(toPoint pos : CGPoint) {
+        touchCircle?.position = pos
         if (ball == nil) {
             drawLine(atPoint: pos)
         }
@@ -468,7 +476,8 @@ class GameScene: SKScene {
     }
 
     func touchUp(atPoint pos : CGPoint) {
-        print("touchUp", pos.x, pos.y)
+        touchCircle?.removeFromParent()
+        touchCircle = nil
         if pos.y <= gameTop {
             if !inRound && ball == nil {
                 line?.removeFromParent()
