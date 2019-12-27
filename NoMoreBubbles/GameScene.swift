@@ -117,6 +117,7 @@ class GameScene: SKScene {
     private var currentPowerUpType: PowerUpType? = nil
 
     private var trailContainerNode: SKShapeNode? = nil
+    private var inRound: Bool = false
 
     override func didMove(to view: SKView) {
         let bottomBarHeight: CGFloat = 70
@@ -217,6 +218,7 @@ class GameScene: SKScene {
     func startGame() {
         let bottomMargin = CGFloat(50)
         let maxRounds = 10000
+        inRound = false
 
         scoreBoard?.resetValues()
 
@@ -439,7 +441,7 @@ class GameScene: SKScene {
     
     func touchUp(atPoint pos : CGPoint) {
         if pos.y <= gameTop {
-            if ball == nil {
+            if !inRound && ball == nil {
                 line?.removeFromParent()
                 line = nil
                 let deltas = CGPoint(x: pos.x - lineOrigin!.x, y: pos.y - lineOrigin!.y)
@@ -483,12 +485,19 @@ class GameScene: SKScene {
             createCircle(atPoint: ball!.node.position)
         }
         ball = nil
+
+        if explosions.count == 0 {
+            endRound()
+        }
         
+        PowerUp.spawnPowerUp(ballsHit: ballsDestroyedThisRound, gameScene: self)
+    }
+
+    func endRound() {
         scoreBoard?.updateLevel(newLevel: scoreBoard!.level + 1)
         scoreBoard?.accumulate()
         ballsDestroyedThisRound = 0
-        
-        PowerUp.spawnPowerUp(ballsHit: ballsDestroyedThisRound, gameScene: self)
+        inRound = false
     }
     
     func createExplosion(radius: CGFloat, strokeColor: UIColor, lineWidth: CGFloat, position: CGPoint) {
@@ -513,6 +522,9 @@ class GameScene: SKScene {
         ]), completion: {
                 if let index = self.explosions.index(of:explosion) {
                     self.explosions.remove(at: index)
+                    if self.explosions.count == 0 && self.ball == nil {
+                        self.endRound()
+                    }
                 }
             }
         )
@@ -616,6 +628,7 @@ class GameScene: SKScene {
             case .superBounce:
                 ball!.node.fillColor = powerUpColorForType(type: powerUp.type)
                 ball!.node.strokeColor = powerUpColorForType(type: powerUp.type)
+                ball!.speed = ballInitialSpeed
                 break
             case .shock:
                 createExplosion(radius: 50, strokeColor: SKColor.red, lineWidth: 3, position: powerUp.node.position)

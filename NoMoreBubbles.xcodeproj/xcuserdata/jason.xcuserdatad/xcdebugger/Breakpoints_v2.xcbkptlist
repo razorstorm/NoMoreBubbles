@@ -14,8 +14,8 @@
             filePath = "NoMoreBubbles/GameScene.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "614"
-            endingLineNumber = "614"
+            startingLineNumber = "624"
+            endingLineNumber = "624"
             landmarkName = "activatePowerUp(powerUp:index:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "NoMoreBubbles/GameScene.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "610"
-            endingLineNumber = "610"
+            startingLineNumber = "620"
+            endingLineNumber = "620"
             landmarkName = "swapBallNode()"
             landmarkType = "7">
          </BreakpointContent>
@@ -46,8 +46,8 @@
             filePath = "NoMoreBubbles/GameScene.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "770"
-            endingLineNumber = "770"
+            startingLineNumber = "781"
+            endingLineNumber = "781"
             landmarkName = "update(_:)"
             landmarkType = "7">
          </BreakpointContent>
