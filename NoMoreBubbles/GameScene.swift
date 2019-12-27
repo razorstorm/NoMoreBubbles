@@ -67,6 +67,7 @@ class GameScene: SKScene {
     private let lineScalingFactor: CGFloat = 0.085
     private let fontScalingFactor: CGFloat = 1.6
     private let levelFontSize: CGFloat = 80
+    private let ballFontSize: CGFloat = 20
     private let circleScoreFontSize: CGFloat = 40
     private let colors: [SKColor] = [SKColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0), SKColor.cyan, SKColor(red: 0.2, green: 0.9, blue: 0.2, alpha: 1.0), SKColor.yellow, SKColor(red: 0.45, green: 0.45, blue: 1.0, alpha: 1.0), SKColor.lightGray, SKColor.orange]
     private let maxCircleSize: CGFloat = 170.0
@@ -483,16 +484,25 @@ class GameScene: SKScene {
                 line?.removeFromParent()
                 line = nil
                 let deltas = CGPoint(x: pos.x - lineOrigin!.x, y: pos.y - lineOrigin!.y)
-                
+
                 let velocity = getVelocity(withDeltas: deltas, withSpeed: ballInitialSpeed)
                 let node = SKShapeNode.init(circleOfRadius: ballInitialRadius)
-                
+
                 node.fillColor = SKColor.white
                 node.isAntialiased = true
                 node.position = lineOrigin!
-                
-                ball = Ball(fromNode: node, withVelocity: velocity, withSpeed: ballInitialSpeed, withRadius: ballInitialRadius)
-                
+
+                let label = SKLabelNode.init()
+                label.fontSize = ballFontSize
+                label.position = CGPoint(x: 0, y: 0)
+                label.horizontalAlignmentMode = .center
+                label.verticalAlignmentMode = .center
+                label.zPosition = 31
+                label.fontName = "HelveticaNeue-Bold"
+
+                ball = Ball(fromNode: node, withLabelNode: label, withVelocity: velocity, withSpeed: ballInitialSpeed, withRadius: ballInitialRadius)
+
+                node.addChild(label)
                 playingScreen?.addChild(node)
             }
         } else {
@@ -571,15 +581,18 @@ class GameScene: SKScene {
     }
 
     func damageCircle(circle: Circle, withIndex i: Int) {
-        circle.health -= 1
+        if currentPowerUpType == .doubleDamage {
+            circle.health -= 2
+        } else {
+            circle.health -= 1
+        }
         circle.labelNode.text = circle.health > 0 ? String(circle.health) : ""
         circle.node.run(SKAction.sequence([
             SKAction.scale(by: 0.9, duration: 0.1),
             SKAction.scale(by: 1.1111111111, duration: 0.1),
         ]))
 
-        if circle.health == 0 {
-            self.circles.remove(at: i)
+        if circle.health <= 0 {
             scoreBoard?.updateCurrentScore(newScore: scoreBoard!.currentScore + 1)
             ballsDestroyedThisRound += 1
 
@@ -592,6 +605,8 @@ class GameScene: SKScene {
                 circle.node.removeFromParent()
                 circle.labelNode.removeFromParent()
             })
+
+            self.circles.remove(at: i)
 
             createExplosion(
                 radius: circle.radius / 5.0, strokeColor: circle.node.strokeColor, lineWidth: circle.node.lineWidth / 5.0, position: circle.node.position
@@ -681,6 +696,10 @@ class GameScene: SKScene {
                 ball!.radius = 7.5
                 ball!.speed = ballInitialSpeed
                 swapBallNode()
+            case .doubleDamage:
+                ball!.node.fillColor = powerUpColorForType(type: powerUp.type)
+                ball!.node.strokeColor = powerUpColorForType(type: powerUp.type)
+                ball!.labelNode.text = "2x"
         }
         
         currentPowerUpType = powerUp.type

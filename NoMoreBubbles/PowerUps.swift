@@ -31,9 +31,9 @@ class PowerUp: Equatable {
 
         switch ballsHit {
             case 2:
-                powerUpType = PowerUpType.shock
+                powerUpType = .shock
             case 3:
-                powerUpType = PowerUpType.resetSpeed
+                powerUpType = .resetSpeed
             default:
                 let random = CGFloat.random(in: 0...100)
                 if random < 10 {
@@ -43,6 +43,7 @@ class PowerUp: Equatable {
 
         // Delete
         powerUpType = randomPowerUpType()
+        powerUpType = .doubleDamage
 
         if powerUpType != nil {
             let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
@@ -74,6 +75,7 @@ enum PowerUpType: UInt32, CaseIterable {
     case resetSpeed
     case largeBall
     case smallBall
+    case doubleDamage
 }
 
 func randomPowerUpType() -> PowerUpType {
@@ -87,6 +89,7 @@ func powerUpColorForType(type: PowerUpType) -> SKColor {
         case .superBounce: return SKColor.green
         case .largeBall: return SKColor.yellow
         case .smallBall: return SKColor.yellow
+        case .doubleDamage: return SKColor.red
     }
 }
 
@@ -97,5 +100,6 @@ func powerUpStringForType(type: PowerUpType) -> String {
         case .superBounce: return "B"
         case .largeBall: return "+"
         case .smallBall: return "—"
+        case .doubleDamage: return "2x"
     }
 }
