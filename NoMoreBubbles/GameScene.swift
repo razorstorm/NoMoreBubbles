@@ -129,20 +129,18 @@ class GameScene: SKScene {
         screenRight = screenWidth/2
         screenTop = screenHeight/2
         screenBottom = -screenHeight/2
-//        gameTop = screenTop - scoreBoardHeight - 1
-//        gameBottom = screenBottom + bottomBarHeight
         gameTop = gameHeight/2
         gameBottom = -gameHeight / 2.0
-        
+
         origin = CGPoint(x: 0 , y: gameBottom)
         lineOrigin = CGPoint(x: 0 , y: gameBottom)
-        
+
         let scoreBoardNode = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth + 2, height: scoreBoardHeight + 1))
         scoreBoardNode.position = CGPoint(x: 0, y: screenTop - scoreBoardHeight / 2.0 + 1)
         scoreBoardNode.zPosition = 30
         scoreBoardNode.lineWidth = 2
         scoreBoardNode.fillColor = scoreColor
-        
+
         let label = SKLabelNode.init(text: String(1))
         label.fontSize = levelFontSize
         label.position = CGPoint(x: 0, y: screenTop - 110)
@@ -154,7 +152,7 @@ class GameScene: SKScene {
         accumScoreLabel.position = CGPoint(x: screenRight - 50, y: screenTop - 110)
         accumScoreLabel.fontColor = SKColor.white
         accumScoreLabel.zPosition = 31
-        
+
         let currentScoreLabel = SKLabelNode.init(text: String(0))
         currentScoreLabel.fontSize = circleScoreFontSize
         currentScoreLabel.position = CGPoint(x: screenLeft + 50, y: screenTop - 110)
@@ -186,7 +184,6 @@ class GameScene: SKScene {
 
         gameScreen = SKShapeNode.init(rectOf: CGSize.init(width: screenWidth, height: gameHeight))
         gameScreen?.position = CGPoint(x: 0, y: bottomBarHeight / 2.0 - scoreBoardHeight / 2.0 - 1)
-//        gameScreen?.fillColor = SKColor.blue.withAlphaComponent(0.1)
         gameScreen?.strokeColor = SKColor.clear
         addChild(gameScreen!)
 
@@ -204,17 +201,15 @@ class GameScene: SKScene {
 
         goal = SKShapeNode(circleOfRadius: goalRadius)
         goal!.position = lineOrigin!
-//        goal!.position = CGPoint(x: 0, y: 0)
         goal!.strokeColor = SKColor.green
         goal!.fillColor = UIColor.green.withAlphaComponent(0.1)
         goal!.isAntialiased = true
         goal!.lineWidth = 2
-        //        goal!.zPosition = 10000
         gameScreen?.addChild(goal!)
-        
+
         startGame()
     }
-    
+
     func startGame() {
         let bottomMargin = CGFloat(50)
         let maxRounds = 10000
@@ -234,13 +229,13 @@ class GameScene: SKScene {
         for powerUp in powerUps {
             powerUp.node.removeFromParent()
         }
-        
+
         ballsDestroyedThisRound = 0
 
         powerUps = []
-        
+
         let generationBottom = gameBottom + bottomMargin
-        
+
         ballLoop: for _ in 1...Int.random(in: 3...6) {
             var position: CGPoint
             var invalidPosition: Bool = false
@@ -250,7 +245,7 @@ class GameScene: SKScene {
                 if (rounds > maxRounds) {
                     continue ballLoop
                 }
-                
+
                 position = generateRandomSeedCircleLocation(
                     generationBottom: generationBottom
                 )
@@ -263,7 +258,7 @@ class GameScene: SKScene {
                 if CGDistance(from: origin!, to: position) < goalRadius + circleMinSize {
                     invalidPosition = true
                 }
-                
+
                 for circle in circles {
                     // If this is inside any of the other circles, then we haven't found a valid position yet. Keep looking
                     if CGDistance(from: position, to: circle.node.position) <= circle.radius + circleMinSize {
@@ -281,7 +276,7 @@ class GameScene: SKScene {
             createCircle(atPoint: position)
         }
     }
-    
+
     func generateRandomSeedCircleLocation(generationBottom: CGFloat) -> CGPoint {
         let gracefulMargin = CGFloat(300)
         var xPosition: CGFloat
@@ -291,7 +286,7 @@ class GameScene: SKScene {
         var xUnclampedPosition: CGFloat
         var yUnclampedPosition: CGFloat
         var margin: CGFloat
-        
+
         if circles.count == 0 {
             margin = circleMaxSize
         } else {
@@ -299,7 +294,7 @@ class GameScene: SKScene {
             // because it can cluster with another circle
             margin = gracefulMargin
         }
-        
+
         xClampedPosition = [CGFloat.random(in: screenLeft+circleMinSize...screenLeft+margin), CGFloat.random(in: screenRight-margin...screenRight-circleMinSize)].randomElement()!
         yClampedPosition = [CGFloat.random(in: gameBottom+circleMinSize...generationBottom+margin), CGFloat.random(in: gameTop-margin...gameTop-circleMinSize)].randomElement()!
 
@@ -316,7 +311,7 @@ class GameScene: SKScene {
         
         return CGPoint(x: xPosition, y: yPosition)
     }
-    
+
     func closestDistance(from: CGPoint) -> CGFloat {
         var minDist = maxCircleSize as CGFloat
         
@@ -366,20 +361,20 @@ class GameScene: SKScene {
         
         return minDist
     }
-    
+
     func touchDown(atPoint pos : CGPoint) {
         if (ball == nil) {
             drawLine(atPoint: pos)
         }
     }
-    
+
     func pathForLine(atPoint pos: CGPoint) -> CGMutablePath {
         let pathToDraw = CGMutablePath()
         pathToDraw.move(to: CGPoint(x: lineOrigin!.x, y: lineOrigin!.y))
         pathToDraw.addLine(to: CGPoint(x: pos.x, y: pos.y))
         return pathToDraw
     }
-    
+
     func drawLine(atPoint pos: CGPoint) {
         let pattern : [CGFloat] = [2.0, 5.0]
         let path = pathForLine(atPoint: pos).copy(dashingWithPhase: 2, lengths: pattern)
@@ -391,7 +386,7 @@ class GameScene: SKScene {
         }
         line!.path = path
     }
-    
+
     func createCircle(atPoint pos: CGPoint, withHealth expectedHealth: Int? = nil) {
         let size = closestDistance(from: pos)
         let node = SKShapeNode.init(circleOfRadius: size)
@@ -406,13 +401,7 @@ class GameScene: SKScene {
         let label = SKLabelNode.init(text: String(health))
         label.fontSize = size * fontScalingFactor
         label.fontColor = color
-//        label.fontName = "SanFranciscoUIDisplay"
-//        label.fontName = "MarkerFelt-Wide"
-//        label.fontName = "HelveticaNeue-UltraLight"
         label.fontName = "HelveticaNeue-Light"
-//        label.fontName = "AppleSDGothicNeo-Bold"
-//        label.fontName = "Chalkduster"
-//        label.fontName = "ChalkboardSE-Bold"
         label.position = CGPoint(x: 0, y: 0)
         label.horizontalAlignmentMode = .center
         label.verticalAlignmentMode = .center
@@ -421,24 +410,24 @@ class GameScene: SKScene {
         node.addChild(label)
 
         let circle = Circle.init(fromRadius: size, fromNode: node, fromHealth: health, fromLabel: label)
-        
+
         for explosion in explosions {
             explosion.circlesHit.insert(circle)
         }
         circles.append(circle)
     }
-    
+
     func touchMoved(toPoint pos : CGPoint) {
         if (ball == nil) {
             drawLine(atPoint: pos)
         }
     }
-    
+
     func normalizeVector(vector: CGVector) -> CGVector {
         let len = CGDistance(from: CGPoint(x: 0, y: 0), to: CGPoint(x: vector.dx, y: vector.dy))
         return len > 0 ? CGVector(dx: vector.dx / len, dy: vector.dy / len) : CGVector.zero
     }
-    
+
     func touchUp(atPoint pos : CGPoint) {
         if pos.y <= gameTop {
             if !inRound && ball == nil {
@@ -529,7 +518,7 @@ class GameScene: SKScene {
             }
         )
     }
-    
+
     func damageCircle(circle: Circle, withIndex i: Int) {
         circle.health -= 1
         circle.labelNode.text = circle.health > 0 ? String(circle.health) : ""
