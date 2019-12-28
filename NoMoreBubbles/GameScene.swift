@@ -553,9 +553,9 @@ class GameScene: SKScene {
             scoreBoard?.updateCurrentScore(newScore: scoreBoard!.currentScore + 100)
         }
         scoreBoard?.accumulate()
-        ballsDestroyedThisRound = 0
         inRound = false
         PowerUp.spawnPowerUp(ballsHit: ballsDestroyedThisRound, gameScene: self)
+        ballsDestroyedThisRound = 0
     }
 
     func createExplosion(radius: CGFloat, strokeColor: UIColor, lineWidth: CGFloat, position: CGPoint) {
