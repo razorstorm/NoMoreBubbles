@@ -154,13 +154,15 @@ class GameScene: SKScene {
 
         let accumScoreLabel = SKLabelNode.init(text: String(0))
         accumScoreLabel.fontSize = circleScoreFontSize
-        accumScoreLabel.position = CGPoint(x: screenRight - 50, y: screenTop - 110)
+        accumScoreLabel.position = CGPoint(x: screenRight - 25, y: screenTop - 110)
         accumScoreLabel.fontColor = SKColor.white
+        accumScoreLabel.horizontalAlignmentMode = .right
         accumScoreLabel.zPosition = 31
 
         let currentScoreLabel = SKLabelNode.init(text: String(0))
         currentScoreLabel.fontSize = circleScoreFontSize
-        currentScoreLabel.position = CGPoint(x: screenLeft + 50, y: screenTop - 110)
+        currentScoreLabel.position = CGPoint(x: screenLeft + 25, y: screenTop - 110)
+        currentScoreLabel.horizontalAlignmentMode = .left
         currentScoreLabel.fontColor = SKColor.white
         currentScoreLabel.zPosition = 31
 
@@ -541,8 +543,6 @@ class GameScene: SKScene {
         if explosions.count == 0 {
             endRound()
         }
-
-        PowerUp.spawnPowerUp(ballsHit: ballsDestroyedThisRound, gameScene: self)
     }
 
     func endRound() {
@@ -553,6 +553,7 @@ class GameScene: SKScene {
         scoreBoard?.accumulate()
         ballsDestroyedThisRound = 0
         inRound = false
+        PowerUp.spawnPowerUp(ballsHit: ballsDestroyedThisRound, gameScene: self)
     }
 
     func createExplosion(radius: CGFloat, strokeColor: UIColor, lineWidth: CGFloat, position: CGPoint) {
