@@ -121,6 +121,8 @@ class GameScene: SKScene {
     private var inRound: Bool = false
     private var touchCircle: SKShapeNode? = nil
 
+    private var circleNodeDLQ: Set<CircleRecord> = Set()
+
     override func didMove(to view: SKView) {
         let bottomBarHeight: CGFloat = 70
 
@@ -539,7 +541,7 @@ class GameScene: SKScene {
         if explosions.count == 0 {
             endRound()
         }
-        
+
         PowerUp.spawnPowerUp(ballsHit: ballsDestroyedThisRound, gameScene: self)
     }
 
@@ -549,7 +551,7 @@ class GameScene: SKScene {
         ballsDestroyedThisRound = 0
         inRound = false
     }
-    
+
     func createExplosion(radius: CGFloat, strokeColor: UIColor, lineWidth: CGFloat, position: CGPoint) {
         let explosionNode = SKShapeNode.init(circleOfRadius: radius)
         explosionNode.strokeColor = strokeColor
@@ -562,7 +564,7 @@ class GameScene: SKScene {
         explosions.append(explosion)
 
         addChild(explosionNode)
-        
+
         explosion.node.run(SKAction.sequence([
             SKAction.group([
                 SKAction.fadeAlpha(to: 0.2, duration: 1.6),
@@ -611,16 +613,36 @@ class GameScene: SKScene {
                 SKAction.fadeOut(withDuration: 0.5)
             ])
 
+            let nanoTime = DispatchTime.now().uptimeNanoseconds // <<<<< Difference in nano seconds (UInt64)
+            let timeInterval = Double(nanoTime) / 1_000_000
+            let circleRecord = CircleRecord(fromCircle: circle, withTimestamp: timeInterval)
+
+            circleNodeDLQ.insert(circleRecord)
             circle.node.run(actions, completion: {
                 circle.node.removeFromParent()
                 circle.labelNode.removeFromParent()
+                self.circleNodeDLQ.remove(circleRecord)
             })
-
             self.circles.remove(at: i)
 
             createExplosion(
                 radius: circle.radius / 5.0, strokeColor: circle.node.strokeColor, lineWidth: circle.node.lineWidth / 5.0, position: circle.node.position
             )
+        }
+        checkCircles()
+    }
+
+    func checkCircles() {
+        let nanoTime = DispatchTime.now().uptimeNanoseconds // <<<<< Difference in nano seconds (UInt64)
+        let timeInterval = Double(nanoTime) / 1_000_000
+        for record in circleNodeDLQ {
+            let circle = record.circle
+            let timestamp = record.timestamp
+            if timestamp > timeInterval + 600 {
+                circle.node.removeFromParent()
+                circle.labelNode.removeFromParent()
+                self.circleNodeDLQ.remove(record)
+            }
         }
     }
 

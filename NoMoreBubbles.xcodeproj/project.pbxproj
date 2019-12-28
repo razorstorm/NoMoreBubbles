@@ -24,6 +24,7 @@
 		96E2A0AB23B063AC004EC14A /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2A0AA23B063AC004EC14A /* Utils.swift */; };
 		96E2A0AF23B3F992004EC14A /* MyParticle.sks in Resources */ = {isa = PBXBuildFile; fileRef = 96E2A0AE23B3F992004EC14A /* MyParticle.sks */; };
 		96E2A0B123B41996004EC14A /* PowerUps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2A0B023B41996004EC14A /* PowerUps.swift */; };
+		96E2A0B323B6D540004EC14A /* CircleRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2A0B223B6D540004EC14A /* CircleRecord.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +59,7 @@
 		96E2A0AA23B063AC004EC14A /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		96E2A0AE23B3F992004EC14A /* MyParticle.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = MyParticle.sks; sourceTree = "<group>"; };
 		96E2A0B023B41996004EC14A /* PowerUps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerUps.swift; sourceTree = "<group>"; };
+		96E2A0B223B6D540004EC14A /* CircleRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleRecord.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +118,7 @@
 				967387AD22DFC094001940D2 /* Main.storyboard */,
 				96E2A0AE23B3F992004EC14A /* MyParticle.sks */,
 				96E2A0B023B41996004EC14A /* PowerUps.swift */,
+				96E2A0B223B6D540004EC14A /* CircleRecord.swift */,
 			);
 			path = NoMoreBubbles;
 			sourceTree = "<group>";
@@ -236,6 +239,7 @@
 			files = (
 				96E2A0B123B41996004EC14A /* PowerUps.swift in Sources */,
 				967387AA22DFC094001940D2 /* GameScene.swift in Sources */,
+				96E2A0B323B6D540004EC14A /* CircleRecord.swift in Sources */,
 				96E2A0A923B06330004EC14A /* Explosion.swift in Sources */,
 				96E2A0A223B06098004EC14A /* Circle.swift in Sources */,
 				96E2A0A523B06266004EC14A /* Ball.swift in Sources */,
