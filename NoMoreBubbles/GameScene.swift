@@ -546,6 +546,9 @@ class GameScene: SKScene {
 
     func endRound() {
         scoreBoard?.updateLevel(newLevel: scoreBoard!.level + 1)
+        if circles.count == 0 {
+            scoreBoard?.updateCurrentScore(newScore: scoreBoard!.currentScore + 100)
+        }
         scoreBoard?.accumulate()
         ballsDestroyedThisRound = 0
         inRound = false
