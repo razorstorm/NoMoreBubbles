@@ -866,8 +866,9 @@ class GameScene: SKScene {
     }
 
     override func update(_ currentTime: TimeInterval) {
+        print("update", currentTime)
         let frameInterval: CGFloat = CGFloat(currentTime - previousTime)
-        let frameScalingFactor: CGFloat = frameInterval / physicsFrameRate
+        let frameScalingFactor: CGFloat = min(frameInterval / physicsFrameRate, 10)
 
         previousTime = currentTime
 
