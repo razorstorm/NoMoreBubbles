@@ -120,7 +120,7 @@ class PowerUp: Equatable {
                 powerUpType = randomPowerUpTypeFromSet(types: [.superBounce, .allCircles1HP])
             default:
                 let random = CGFloat.random(in: 0...100)
-                if random < 10 {
+                if random < 5 {
                     powerUpType = randomPowerUpType()
             }
         }

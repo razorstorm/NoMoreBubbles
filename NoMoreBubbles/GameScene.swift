@@ -572,8 +572,8 @@ class GameScene: SKScene {
 
         explosion.node.run(SKAction.sequence([
             SKAction.group([
-                SKAction.fadeAlpha(to: 0.2, duration: 1.6),
-                SKAction.scale(by: 10, duration: 1.6),
+                SKAction.fadeAlpha(to: 0.2, duration: 1.2),
+                SKAction.scale(by: 10, duration: 1.2),
             ]),
             SKAction.removeFromParent()
         ]), completion: {
