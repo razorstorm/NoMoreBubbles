@@ -466,7 +466,7 @@ class GameScene: SKScene {
 
     func touchMoved(toPoint pos : CGPoint) {
         touchCircle?.position = pos
-        if (ball == nil) {
+        if (ball == nil && !inRound) {
             drawLine(atPoint: pos)
         }
     }
@@ -504,6 +504,7 @@ class GameScene: SKScene {
 
                 node.addChild(label)
                 playingScreen?.addChild(node)
+                inRound = true
             }
         } else {
             startGame()
