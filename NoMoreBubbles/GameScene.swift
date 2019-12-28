@@ -19,6 +19,7 @@
 // Earned power ups, depending on how many circles destroyed previous round:
 // 2: resetSpeed / skullBall / doubleDamage
 // 3: large / small / shock
+
 // 4: shockwaveOnBounce / randomDamageCircles / damageAura
 // 5: superBounce / ultra speed / allCircles1hp
 // 6: destroy X circles
@@ -537,6 +538,7 @@ class GameScene: SKScene {
             createCircle(atPoint: ball!.node.position)
         }
         ball = nil
+        currentPowerUp = nil
 
         if explosions.count == 0 {
             endRound()
@@ -672,6 +674,10 @@ class GameScene: SKScene {
 
         generateParticles(position: ball!.node.position, color: circle.node.fillColor.withAlphaComponent(1.0))
 
+        if currentPowerUp?.type == .shockOnBounce {
+            createExplosion(radius: 15, strokeColor: SKColor.red, lineWidth: 3, position: ballCenter)
+        }
+
         return ballPosition
     }
 
@@ -705,40 +711,6 @@ class GameScene: SKScene {
         ball!.node = node
         playingScreen?.addChild(node)
         trailContainerNode?.removeAllChildren()
-    }
-    
-    func activatePowerUp(powerUp: PowerUp, index: Int) {
-        switch powerUp.type {
-            case .resetSpeed:
-                ball!.speed = ballInitialSpeed
-                break
-            case .superBounce:
-                ball!.speed = ballInitialSpeed
-                break
-            case .shock:
-                createExplosion(radius: 50, strokeColor: SKColor.red, lineWidth: 3, position: powerUp.node.position)
-                break
-            case .largeBall:
-                ball!.radius = 30
-                ball!.speed = ballInitialSpeed
-                swapBallNode()
-            case .smallBall:
-                ball!.radius = 7.5
-                ball!.speed = ballInitialSpeed
-                swapBallNode()
-            case .doubleDamage:
-                break
-            case .skullBall:
-                break
-        }
-        ball!.labelNode.text = powerUp.ballLabel()
-
-        ball!.node.fillColor = powerUp.ballFillColor()
-        ball!.node.strokeColor = powerUp.ballStrokeColor()
-    
-        currentPowerUp = powerUp
-        powerUp.node.removeFromParent()
-        powerUps.removeAll(where: { $0 == powerUp })
     }
 
     func checkPowerUpCollisions(ballPosition: CGPoint) {
