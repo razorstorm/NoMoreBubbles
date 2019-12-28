@@ -7,6 +7,7 @@
 //
 
 // TODO: powerups, spawn circles further from wall if ball ends too close. reflections on line from balls
+// Label on bottom that shows current power up / last activated powerup
 
 // Game Modes:
 // Sandbox: no death
@@ -378,7 +379,7 @@ class GameScene: SKScene {
         touchCircle?.strokeColor = SKColor.clear
         touchCircle?.position = pos
         gameScreen?.addChild(touchCircle!)
-        if (ball == nil) {
+        if (ball == nil && !inRound) {
             drawLine(atPoint: pos)
         }
     }
