@@ -42,6 +42,7 @@
 // 10 frames per second until next launch LOLL
 // Teleports ball to a random location and resets speed
 // Teleports on bounce
+// lag on app reopen
 
 // Power up ideas:
 // SuperBounce On bounce from circles, speeds up. make circles glowing or something
@@ -568,7 +569,7 @@ class GameScene: SKScene {
         let explosion = Explosion.init(withNode: explosionNode)
         explosions.append(explosion)
 
-        addChild(explosionNode)
+        gameScreen?.addChild(explosionNode)
 
         explosion.node.run(SKAction.sequence([
             SKAction.group([
@@ -869,7 +870,7 @@ class GameScene: SKScene {
         let frameScalingFactor: CGFloat = frameInterval / physicsFrameRate
 
         previousTime = currentTime
-        
+
         if (ball != nil) {
             if (ball!.speed <= 0) {
                 onBallStop()
