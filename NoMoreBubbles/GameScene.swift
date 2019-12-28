@@ -480,9 +480,9 @@ class GameScene: SKScene {
         touchCircle?.removeFromParent()
         touchCircle = nil
         if pos.y <= gameTop {
+            line?.removeFromParent()
+            line = nil
             if !inRound && ball == nil {
-                line?.removeFromParent()
-                line = nil
                 let deltas = CGPoint(x: pos.x - lineOrigin!.x, y: pos.y - lineOrigin!.y)
 
                 let velocity = getVelocity(withDeltas: deltas, withSpeed: ballInitialSpeed)

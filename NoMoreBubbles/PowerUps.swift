@@ -111,9 +111,13 @@ class PowerUp: Equatable {
 
         switch ballsHit {
             case 2:
-                powerUpType = .shock
+                powerUpType = randomPowerUpTypeFromSet(types: [.resetSpeed, .skullBall, .doubleDamage])
             case 3:
-                powerUpType = .resetSpeed
+                powerUpType = randomPowerUpTypeFromSet(types: [.largeBall, .smallBall, .shock])
+            case 4:
+                powerUpType = randomPowerUpTypeFromSet(types: [.shockOnBounce, .randomDamageCircles])
+            case 5:
+                powerUpType = randomPowerUpTypeFromSet(types: [.superBounce, .allCircles1HP])
             default:
                 let random = CGFloat.random(in: 0...100)
                 if random < 10 {
@@ -122,7 +126,7 @@ class PowerUp: Equatable {
         }
 
         // Delete
-        powerUpType = randomPowerUpType()
+//        powerUpType = randomPowerUpType()
 //        powerUpType = .allCircles1HP
 
         if powerUpType != nil {
@@ -165,6 +169,10 @@ enum PowerUpType: UInt32, CaseIterable {
 
 func randomPowerUpType() -> PowerUpType {
     return PowerUpType(rawValue: arc4random_uniform(UInt32(PowerUpType.allCases.count)))!
+}
+
+func randomPowerUpTypeFromSet(types: Set<PowerUpType>) -> PowerUpType {
+    return types.randomElement()!
 }
 
 func fillColorForType(type: PowerUpType) -> SKColor {
