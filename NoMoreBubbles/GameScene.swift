@@ -8,6 +8,8 @@
 
 // TODO: powerups, spawn circles further from wall if ball ends too close. reflections on line from balls
 // Label on bottom that shows current power up / last activated powerup
+// save game to disk
+// display stats on bottom: average points per round, balls hit this round
 
 // Game Modes:
 // Sandbox: no death
@@ -72,7 +74,7 @@ class GameScene: SKScene {
     private let fontScalingFactor: CGFloat = 1.6
     private let levelFontSize: CGFloat = 80
     private let ballFontSize: CGFloat = 20
-    private let circleScoreFontSize: CGFloat = 40
+    private let circleScoreFontSize: CGFloat = 33
     private let colors: [SKColor] = [SKColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0), SKColor.cyan, SKColor(red: 0.2, green: 0.9, blue: 0.2, alpha: 1.0), SKColor.yellow, SKColor(red: 0.45, green: 0.45, blue: 1.0, alpha: 1.0), SKColor.lightGray, SKColor.orange]
     private let maxCircleSize: CGFloat = 170.0
     var ball: Ball?
@@ -212,9 +214,9 @@ class GameScene: SKScene {
         goal = SKShapeNode(circleOfRadius: goalRadius)
         goal!.position = lineOrigin!
         goal!.strokeColor = SKColor.green
-        goal!.fillColor = UIColor.green.withAlphaComponent(0.1)
+//        goal!.fillColor = UIColor.green.withAlphaComponent(0.1)
         goal!.isAntialiased = true
-        goal!.lineWidth = 2
+        goal!.lineWidth = 1
         gameScreen?.addChild(goal!)
 
         startGame()
