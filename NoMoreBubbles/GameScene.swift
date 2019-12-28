@@ -562,19 +562,19 @@ class GameScene: SKScene {
         let explosionNode = SKShapeNode.init(circleOfRadius: radius)
         explosionNode.strokeColor = strokeColor
         explosionNode.lineWidth = lineWidth
-        explosionNode.alpha = 0.5
+        explosionNode.alpha = 1
         explosionNode.isAntialiased = true
         explosionNode.position = position
         explosionNode.glowWidth = 1/5
-        let explosion = Explosion.init(withNode: explosionNode)
+        let explosion = Explosion(withNode: explosionNode)
         explosions.append(explosion)
 
         gameScreen?.addChild(explosionNode)
 
         explosion.node.run(SKAction.sequence([
             SKAction.group([
-                SKAction.fadeAlpha(to: 0.2, duration: 1.2),
-                SKAction.scale(by: 10, duration: 1.2),
+                SKAction.fadeAlpha(to: 0.6, duration: 0.7),
+                SKAction.scale(by: 10, duration: 0.7),
             ]),
             SKAction.removeFromParent()
         ]), completion: {
@@ -626,9 +626,10 @@ class GameScene: SKScene {
             }
 
             createExplosion(
-                radius: circle.radius / 5.0, strokeColor: circle.node.strokeColor, lineWidth: circle.node.lineWidth / 5.0, position: circle.node.position
+                radius: circle.radius / 8, strokeColor: circle.node.strokeColor, lineWidth: circle.node.lineWidth / 5.0, position: circle.node.position
             )
         }
+
         checkCircles()
     }
 
@@ -866,7 +867,6 @@ class GameScene: SKScene {
     }
 
     override func update(_ currentTime: TimeInterval) {
-        print("update", currentTime)
         let frameInterval: CGFloat = CGFloat(currentTime - previousTime)
         let frameScalingFactor: CGFloat = min(frameInterval / physicsFrameRate, 10)
 
