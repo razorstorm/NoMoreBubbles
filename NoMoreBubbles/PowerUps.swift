@@ -46,6 +46,8 @@ class PowerUp: Equatable {
                 break
             case .shockOnBounce:
                 break
+            case .randomDamageCircles:
+                gameScene.randomDamageCircles()
         }
 
         gameScene.currentPowerUp = self
@@ -66,7 +68,7 @@ class PowerUp: Equatable {
 
     public func ballStrokeColor() -> SKColor {
         switch type {
-            case .resetSpeed, .shock:
+            case .resetSpeed, .shock, .randomDamageCircles:
                 return SKColor.white
             case .superBounce, .largeBall, .smallBall, .doubleDamage, .skullBall, .shockOnBounce:
             return ballFillColor()
@@ -75,7 +77,7 @@ class PowerUp: Equatable {
 
     public func ballFillColor() -> SKColor {
         switch type {
-            case .resetSpeed, .shock:
+            case .resetSpeed, .shock, .randomDamageCircles:
                 return SKColor.white
             case .superBounce, .largeBall, .smallBall, .doubleDamage, .skullBall, .shockOnBounce:
                 return PowerUp.powerUpColor(type: type)
@@ -92,6 +94,7 @@ class PowerUp: Equatable {
             case .doubleDamage: return SKColor.red
             case .skullBall: return SKColor.black
             case .shockOnBounce: return SKColor.gray
+            case .randomDamageCircles: return SKColor.white
         }
     }
     
@@ -117,7 +120,6 @@ class PowerUp: Equatable {
 
         // Delete
         powerUpType = randomPowerUpType()
-        powerUpType = .smallBall
 
         if powerUpType != nil {
             let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
@@ -153,6 +155,7 @@ enum PowerUpType: UInt32, CaseIterable {
     case doubleDamage
     case skullBall
     case shockOnBounce
+    case randomDamageCircles
 }
 
 func randomPowerUpType() -> PowerUpType {
@@ -176,5 +179,6 @@ func powerUpLabelForType(type: PowerUpType) -> String {
         case .doubleDamage: return "2x"
         case .skullBall: return "☠"
         case .shockOnBounce: return "💢"
+        case .randomDamageCircles: return "?"
     }
 }

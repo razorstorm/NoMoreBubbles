@@ -63,7 +63,7 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene {
-    private var circles: [Circle] = []
+    private var circles: Set<Circle> = Set()
     private var explosions: [Explosion] = []
     private let lineScalingFactor: CGFloat = 0.085
     private let fontScalingFactor: CGFloat = 1.6
@@ -226,7 +226,7 @@ class GameScene: SKScene {
             circle.node.removeAllChildren()
             circle.node.removeFromParent()
         }
-        circles = []
+        circles = Set()
         ball?.node.removeFromParent()
         ball = nil
         playingScreen?.removeAllChildren()
@@ -464,7 +464,7 @@ class GameScene: SKScene {
         for explosion in explosions {
             explosion.circlesHit.insert(circle)
         }
-        circles.append(circle)
+        circles.insert(circle)
     }
 
     func touchMoved(toPoint pos : CGPoint) {
@@ -590,16 +590,8 @@ class GameScene: SKScene {
         ball!.node.strokeColor = currentPowerUp?.ballStrokeColor() ?? SKColor.white
     }
 
-    func damageCircle(circle: Circle, withIndex i: Int) {
-        switch currentPowerUp?.type {
-            case .doubleDamage: circle.health -= 2
-            case .skullBall:
-                circle.health = 0
-                currentPowerUp = nil
-                updateBallToPowerUp()
-            default: circle.health -= 1
-        }
-
+    func damageCircleBy(circle: Circle, damage: Int) {
+        circle.health -= damage
         circle.labelNode.text = circle.health > 0 ? String(circle.health) : ""
         circle.node.run(SKAction.sequence([
             SKAction.scale(by: 0.9, duration: 0.1),
@@ -625,7 +617,9 @@ class GameScene: SKScene {
                 circle.labelNode.removeFromParent()
                 self.circleNodeDLQ.remove(circleRecord)
             })
-            self.circles.remove(at: i)
+            if self.circles.contains(circle) {
+                self.circles.remove(circle)
+            }
 
             createExplosion(
                 radius: circle.radius / 5.0, strokeColor: circle.node.strokeColor, lineWidth: circle.node.lineWidth / 5.0, position: circle.node.position
@@ -634,8 +628,26 @@ class GameScene: SKScene {
         checkCircles()
     }
 
+    func damageCircle(circle: Circle) {
+        switch currentPowerUp?.type {
+            case .doubleDamage: damageCircleBy(circle: circle, damage: 2)
+            case .skullBall:
+                damageCircleBy(circle: circle, damage: circle.health)
+                currentPowerUp = nil
+                updateBallToPowerUp()
+            default: damageCircleBy(circle: circle, damage: 1)
+        }
+    }
+
+    func randomDamageCircles() {
+        for circle in circles {
+            let damage = Int.random(in: 0...circle.health)
+            damageCircleBy(circle: circle, damage: damage)
+        }
+    }
+
     func checkCircles() {
-        let nanoTime = DispatchTime.now().uptimeNanoseconds // <<<<< Difference in nano seconds (UInt64)
+        let nanoTime = DispatchTime.now().uptimeNanoseconds
         let timeInterval = Double(nanoTime) / 1_000_000
         for record in circleNodeDLQ {
             let circle = record.circle
@@ -648,7 +660,7 @@ class GameScene: SKScene {
         }
     }
 
-    func onCollideWithCircle(ballCenter: CGPoint, circle: Circle, withIndex i: Int) -> CGPoint {
+    func onCollideWithCircle(ballCenter: CGPoint, circle: Circle) -> CGPoint {
         let collisionVector = normalizeVector(vector: CGVector(dx: ballCenter.x - circle.node.position.x , dy: ballCenter.y - circle.node.position.y))
         let normalizedVelocity = normalizeVector(vector: ball!.velocity)
 
@@ -670,7 +682,7 @@ class GameScene: SKScene {
         let collisionPosition = CGPoint(x: circle.node.position.x + collisionVector.dx * distance, y: circle.node.position.y + collisionVector.dy * distance)
         let ballPosition = collisionPosition
 
-        damageCircle(circle: circle, withIndex: i)
+        damageCircle(circle: circle)
 
         generateParticles(position: ball!.node.position, color: circle.node.fillColor.withAlphaComponent(1.0))
 
@@ -689,10 +701,10 @@ class GameScene: SKScene {
 
     func updateExplosions() {
         for explosion in explosions {
-            for (i, circle) in circles.enumerated() {
+            for circle in circles {
                 if CGDistance(from: circle.node.position, to: explosion.node.position) < circle.radius + explosion.node.frame.width / 2.0 {
                     if !explosion.circlesHit.contains(circle) {
-                        damageCircle(circle: circle, withIndex: i)
+                        damageCircle(circle: circle)
                         explosion.circlesHit.insert(circle)
                     }
                 }
@@ -868,9 +880,9 @@ class GameScene: SKScene {
                 checkPowerUpCollisions(ballPosition: ballPosition)
 
                 // collision with other circles
-                for (i,circle) in circles.enumerated() {
+                for circle in circles {
                     if CGDistance(from: originalBallPosition, to: circle.node.position) <= circle.radius + ball!.radius {
-                        ballPosition = onCollideWithCircle(ballCenter: originalBallPosition, circle: circle, withIndex: i)
+                        ballPosition = onCollideWithCircle(ballCenter: originalBallPosition, circle: circle)
                     }
                 }
 
