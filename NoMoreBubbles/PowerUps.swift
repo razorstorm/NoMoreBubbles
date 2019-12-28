@@ -48,6 +48,8 @@ class PowerUp: Equatable {
                 break
             case .randomDamageCircles:
                 gameScene.randomDamageCircles()
+            case .allCircles1HP:
+                gameScene.setAllCirclesToHealth()
         }
 
         gameScene.currentPowerUp = self
@@ -68,7 +70,7 @@ class PowerUp: Equatable {
 
     public func ballStrokeColor() -> SKColor {
         switch type {
-            case .resetSpeed, .shock, .randomDamageCircles:
+            case .resetSpeed, .shock, .randomDamageCircles, .allCircles1HP:
                 return SKColor.white
             case .superBounce, .largeBall, .smallBall, .doubleDamage, .skullBall, .shockOnBounce:
             return ballFillColor()
@@ -77,7 +79,7 @@ class PowerUp: Equatable {
 
     public func ballFillColor() -> SKColor {
         switch type {
-            case .resetSpeed, .shock, .randomDamageCircles:
+            case .resetSpeed, .shock, .randomDamageCircles, .allCircles1HP:
                 return SKColor.white
             case .superBounce, .largeBall, .smallBall, .doubleDamage, .skullBall, .shockOnBounce:
                 return PowerUp.powerUpColor(type: type)
@@ -94,6 +96,7 @@ class PowerUp: Equatable {
             case .doubleDamage: return SKColor.red
             case .skullBall: return SKColor.black
             case .shockOnBounce: return SKColor.gray
+            case .allCircles1HP: return SKColor.cyan
             case .randomDamageCircles: return SKColor.white
         }
     }
@@ -120,6 +123,7 @@ class PowerUp: Equatable {
 
         // Delete
         powerUpType = randomPowerUpType()
+        powerUpType = .allCircles1HP
 
         if powerUpType != nil {
             let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
@@ -156,6 +160,7 @@ enum PowerUpType: UInt32, CaseIterable {
     case skullBall
     case shockOnBounce
     case randomDamageCircles
+    case allCircles1HP
 }
 
 func randomPowerUpType() -> PowerUpType {
@@ -180,5 +185,6 @@ func powerUpLabelForType(type: PowerUpType) -> String {
         case .skullBall: return "☠"
         case .shockOnBounce: return "💢"
         case .randomDamageCircles: return "?"
+        case .allCircles1HP: return "X"
     }
 }

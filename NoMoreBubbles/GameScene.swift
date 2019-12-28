@@ -19,9 +19,9 @@
 // Earned power ups, depending on how many circles destroyed previous round:
 // 2: resetSpeed / skullBall / doubleDamage
 // 3: large / small / shock
-
-// 4: shockwaveOnBounce / randomDamageCircles / damageAura
+// 4: shockwaveOnBounce / randomDamageCircles
 // 5: superBounce / ultra speed / allCircles1hp
+
 // 6: destroy X circles
 // 7: clearWholeMap
 // 8: spawnAMillionThes
@@ -417,8 +417,6 @@ class GameScene: SKScene {
         }
 
         pathToDraw.move(to: CGPoint(x: lineOrigin!.x, y: lineOrigin!.y))
-//        pathToDraw.addLine(to: CGPoint(x: pos.x, y: pos.y))
-//        pathToDraw.addLine(to: CGPoint(x: expandedX, y: expandedY))
         pathToDraw.addLine(to: position)
         return pathToDraw
     }
@@ -434,7 +432,6 @@ class GameScene: SKScene {
             playingScreen?.addChild(line!)
         }
         line!.path = path
-//        hitTestWithSegmentFromPoint()
     }
 
     func createCircle(atPoint pos: CGPoint, withHealth expectedHealth: Int? = nil) {
@@ -646,6 +643,13 @@ class GameScene: SKScene {
         }
     }
 
+    func setAllCirclesToHealth() {
+        for circle in circles {
+            let damage = circle.health - 1
+            damageCircleBy(circle: circle, damage: damage)
+        }
+    }
+
     func checkCircles() {
         let nanoTime = DispatchTime.now().uptimeNanoseconds
         let timeInterval = Double(nanoTime) / 1_000_000
@@ -675,7 +679,7 @@ class GameScene: SKScene {
         if currentPowerUp?.type == PowerUpType.superBounce {
             ball!.speed = ballInitialSpeed
         }
-        
+
         ball!.velocity = CGVector(dx: ball!.speed * normalizedResultant.dx, dy: ball!.speed * normalizedResultant.dy)
 
         let distance = ball!.radius + circle.radius
