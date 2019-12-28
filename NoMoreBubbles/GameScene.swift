@@ -22,8 +22,8 @@
 // 3: large / small / shock
 // 4: shockwaveOnBounce / randomDamageCircles
 // 5: superBounce / ultra speed / allCircles1hp
+// 6: receive x points / very slow deceleration
 
-// 6: destroy X circles
 // 7: clearWholeMap
 // 8: spawnAMillionThes
 // ScreenClear: 100 points
@@ -43,6 +43,7 @@
 // Teleports ball to a random location and resets speed
 // Teleports on bounce
 // lag on app reopen
+// spawn a bunch of circles
 
 // Power up ideas:
 // SuperBounce On bounce from circles, speeds up. make circles glowing or something
@@ -101,7 +102,7 @@ class GameScene: SKScene {
     private var particleDistance: CGFloat = 30
     private let maxTrailsLimit: Int = 1000
     
-    private var scoreBoard: ScoreBoard?
+    var scoreBoard: ScoreBoard?
     private let scoreBoardHeight: CGFloat = 130
     
     private let goalRadius: CGFloat = 79
@@ -494,6 +495,7 @@ class GameScene: SKScene {
 
                 node.fillColor = SKColor.white
                 node.isAntialiased = true
+                node.zPosition = 100
                 node.position = lineOrigin!
 
                 let label = SKLabelNode.init()

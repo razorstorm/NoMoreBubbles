@@ -50,6 +50,10 @@ class PowerUp: Equatable {
                 gameScene.randomDamageCircles()
             case .allCircles1HP:
                 gameScene.setAllCirclesToHealth()
+            case .receiveXPoints:
+                let random = Int.random(in: 3...8)
+                let newScore = gameScene.scoreBoard!.currentScore + random
+                gameScene.scoreBoard?.updateCurrentScore(newScore: newScore)
         }
 
         gameScene.currentPowerUp = self
@@ -70,7 +74,7 @@ class PowerUp: Equatable {
 
     public func ballStrokeColor() -> SKColor {
         switch type {
-            case .resetSpeed, .shock, .randomDamageCircles, .allCircles1HP:
+            case .resetSpeed, .shock, .randomDamageCircles, .allCircles1HP, .receiveXPoints:
                 return SKColor.white
             case .superBounce, .largeBall, .smallBall, .doubleDamage, .skullBall, .shockOnBounce:
             return ballFillColor()
@@ -79,7 +83,7 @@ class PowerUp: Equatable {
 
     public func ballFillColor() -> SKColor {
         switch type {
-            case .resetSpeed, .shock, .randomDamageCircles, .allCircles1HP:
+            case .resetSpeed, .shock, .randomDamageCircles, .allCircles1HP, .receiveXPoints:
                 return SKColor.white
             case .superBounce, .largeBall, .smallBall, .doubleDamage, .skullBall, .shockOnBounce:
                 return PowerUp.powerUpColor(type: type)
@@ -98,6 +102,7 @@ class PowerUp: Equatable {
             case .shockOnBounce: return SKColor.gray
             case .allCircles1HP: return SKColor.cyan
             case .randomDamageCircles: return SKColor.white
+            case .receiveXPoints: return SKColor.init(red: 0, green: 0.7, blue: 0, alpha: 1)
         }
     }
     
@@ -118,6 +123,8 @@ class PowerUp: Equatable {
                 powerUpType = randomPowerUpTypeFromSet(types: [.shockOnBounce, .randomDamageCircles])
             case 5:
                 powerUpType = randomPowerUpTypeFromSet(types: [.superBounce, .allCircles1HP])
+            case 6:
+                powerUpType = .receiveXPoints
             default:
                 let random = CGFloat.random(in: 0...100)
                 if random < 5 {
@@ -127,7 +134,7 @@ class PowerUp: Equatable {
 
         // Delete
 //        powerUpType = randomPowerUpType()
-//        powerUpType = .allCircles1HP
+//        powerUpType = .receiveXPoints
 
         if powerUpType != nil {
             let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
@@ -165,6 +172,7 @@ enum PowerUpType: UInt32, CaseIterable {
     case shockOnBounce
     case randomDamageCircles
     case allCircles1HP
+    case receiveXPoints
 }
 
 func randomPowerUpType() -> PowerUpType {
@@ -194,5 +202,6 @@ func powerUpLabelForType(type: PowerUpType) -> String {
         case .shockOnBounce: return "💢"
         case .randomDamageCircles: return "?"
         case .allCircles1HP: return "X"
+        case .receiveXPoints: return "$"
     }
 }
