@@ -25,4 +25,14 @@ class Ball {
         radius = withRadius
         labelNode = withLabelNode
     }
+
+    static func createBallNode(radius: CGFloat, position: CGPoint) -> SKShapeNode {
+        let node = SKShapeNode.init(circleOfRadius: radius)
+
+        node.fillColor = SKColor.white
+        node.isAntialiased = true
+        node.zPosition = 100
+        node.position = position
+        return node
+    }
 }

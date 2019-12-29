@@ -10,6 +10,8 @@
 // Label on bottom that shows current power up / last activated powerup
 // save game to disk
 // display stats on bottom: average points per round, balls hit this round
+// allow stacking powerups that dont change state (make them not change ball and not update current powerup)
+// z position layers variables
 
 // Game Modes:
 // Sandbox: no death
@@ -99,7 +101,7 @@ class GameScene: SKScene {
 
     private let circleMinSize: CGFloat = 15
     private let circleMaxSize: CGFloat = 70
-    
+
     private var lastParticleAt: CGPoint?
     private var particleDistance: CGFloat = 30
     private let maxTrailsLimit: Int = 1000
@@ -493,12 +495,8 @@ class GameScene: SKScene {
                 let deltas = CGPoint(x: pos.x - lineOrigin!.x, y: pos.y - lineOrigin!.y)
 
                 let velocity = getVelocity(withDeltas: deltas, withSpeed: ballInitialSpeed)
-                let node = SKShapeNode.init(circleOfRadius: ballInitialRadius)
 
-                node.fillColor = SKColor.white
-                node.isAntialiased = true
-                node.zPosition = 100
-                node.position = lineOrigin!
+                let node = Ball.createBallNode(radius: ballInitialRadius, position: lineOrigin!)
 
                 let label = SKLabelNode.init()
                 label.fontSize = ballFontSize
@@ -729,14 +727,10 @@ class GameScene: SKScene {
     }
     
     func swapBallNode() {
-        let node = SKShapeNode.init(circleOfRadius: ball!.radius)
-        
-        node.fillColor = SKColor.white
-        node.isAntialiased = true
-        node.position = ball!.node.position
-
+        let node = Ball.createBallNode(radius: ball!.radius, position: lineOrigin!)
         ball!.node.removeFromParent()
         ball!.node = node
+        
         playingScreen?.addChild(node)
         trailContainerNode?.removeAllChildren()
     }
@@ -914,11 +908,11 @@ class GameScene: SKScene {
                     trailNode.fillColor = SKColor.lightGray
                     trailNode.lineWidth = 0
                     trailNode.strokeColor = SKColor.lightGray
-                    trailNode.alpha = 1
+                    trailNode.alpha = 0.8
                     trailNode.isAntialiased = true
                     trailNode.position = trailPosition
                     trailNode.glowWidth = 2
-                    trailNode.zPosition = -1
+                    trailNode.zPosition = 99
 
                     trailPosition.x += scaledTravelVector.dx
                     trailPosition.y += scaledTravelVector.dy
@@ -930,7 +924,7 @@ class GameScene: SKScene {
                         SKAction.wait(forDuration: Double(i) * 0.0005),
                         SKAction.group([
                             SKAction.colorTransitionAction(fromColor: trailNode.fillColor, toColor: bgColor, duration: duration),
-//                            SKAction.fadeOut(withDuration: duration),
+                            SKAction.fadeOut(withDuration: duration),
                             SKAction.scale(by: 0, duration: duration)
                         ]),
                         SKAction.removeFromParent()

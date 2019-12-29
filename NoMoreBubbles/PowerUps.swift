@@ -134,7 +134,7 @@ class PowerUp: Equatable {
 
         // Delete
 //        powerUpType = randomPowerUpType()
-//        powerUpType = .receiveXPoints
+//        powerUpType = .largeBall
 
         if powerUpType != nil {
             let powerUpNode = SKShapeNode(circleOfRadius: CGFloat(radius))
