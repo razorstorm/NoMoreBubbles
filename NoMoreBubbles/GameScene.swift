@@ -7,9 +7,9 @@
 //
 
 // TODO: powerups, spawn circles further from wall if ball ends too close. reflections on line from balls
-// Label on bottom that shows current power up / last activated powerup
 // save game to disk
 // display stats on bottom: average points per round, balls hit this round
+// Label on bottom that shows current power up / last activated powerup
 // allow stacking powerups that dont change state (make them not change ball and not update current powerup)
 // z position layers variables
 
@@ -636,7 +636,7 @@ class GameScene: SKScene {
     }
 
     func damageCircle(circle: Circle) {
-        switch currentPowerUp?.type {
+        switch currentPowerUp!.type {
             case .doubleDamage: damageCircleBy(circle: circle, damage: 2)
             case .skullBall:
                 damageCircleBy(circle: circle, damage: circle.health)
@@ -727,7 +727,7 @@ class GameScene: SKScene {
     }
     
     func swapBallNode() {
-        let node = Ball.createBallNode(radius: ball!.radius, position: lineOrigin!)
+        let node = Ball.createBallNode(radius: ball!.radius, position: ball!.node.position)
         ball!.node.removeFromParent()
         ball!.node = node
         
@@ -908,7 +908,7 @@ class GameScene: SKScene {
                     trailNode.fillColor = SKColor.lightGray
                     trailNode.lineWidth = 0
                     trailNode.strokeColor = SKColor.lightGray
-                    trailNode.alpha = 0.8
+                    trailNode.alpha = 0.2
                     trailNode.isAntialiased = true
                     trailNode.position = trailPosition
                     trailNode.glowWidth = 2
